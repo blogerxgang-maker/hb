@@ -1,37 +1,33 @@
 // miniprogram/utils/bleManager.ts
 //
-// 全局蓝牙连接管理器 - 单例。
-// 职责：
-//  1. 扫描 / 连接 / 断开 / 重连。
-//  2. 在密钥校验完成 (type === 1) 时才认为「已连接」。
-//  3. 监听 wx.onBLEConnectionStateChange，断开后按指数退避自动重连。
-//  4. 启动自动重连：onLaunch 时若本地存在 bleInfo，则尝试静默重连一次。
-//  5. 简单事件总线：connected / disconnected / reconnecting / scanResult / reminderUpdate / screenKillUpdate / lightUpTimeUpdate。
+// 全局蓝牙连接管理器（单例）：
+//  1. 扫描 / 连接 / 断开 / 重连
+//  2. 在密钥校验完成 (type === 1) 时才认为「已连接」
+//  3. 监听 wx.onBLEConnectionStateChange，断开后按指数退避自动重连
+//  4. 启动时若本地存在 bleInfo，则尝试静默重连一次
+//  5. 简单事件总线：connected / disconnected / reconnecting / scanResult / reminderUpdate / screenKillUpdate / lightUpTimeUpdate
 //
-// 设计要点：
-//  - 所有 BLE 回调都集中在这里订阅一次（veepooBle.veepooWeiXinSDKNotifyMonitorValueChange），
-//    页面通过 on(event, fn) 注册，避免不同页面互相覆盖回调或重复绑定。
-//  - 「连接成功」仅指物理 BLE 连接；「已认证」（密钥校验通过）才会触发 connected 事件。
+// 注意：避免使用 TS-only 语法（type 别名 / interface / 参数类型注解 / 泛型 / as），
+// 以兼容某些 IDE 真机调试时 Babel 没启用 TS preset 的解析路径。
+// @ts-nocheck
 
 import { veepooBle, veepooFeature } from "../miniprogram_dist/index";
 
-type Listener = (...args: any[]) => void;
-
 const RECONNECT_INTERVALS_MS = [1000, 2000, 4000];
 
-class BleManager implements BleManagerLike {
-  private listeners: Record<string, Listener[]> = {};
-  private currentDevice: any = null;
-  private connecting = false;
-  private connected = false;
-  private authed = false;
-  private reconnectAttempt = 0;
-  private reconnectTimer: any = null;
-  private monitorRegistered = false;
-  private bleStateRegistered = false;
-  private appShowRegistered = false;
-
+class BleManager {
   constructor() {
+    this.listeners = {};
+    this.currentDevice = null;
+    this.connecting = false;
+    this.connected = false;
+    this.authed = false;
+    this.reconnectAttempt = 0;
+    this.reconnectTimer = null;
+    this.monitorRegistered = false;
+    this.bleStateRegistered = false;
+    this.appShowRegistered = false;
+
     this.registerMonitor();
     this.registerBleStateChange();
     this.registerAppLifecycle();
@@ -52,20 +48,18 @@ class BleManager implements BleManagerLike {
     if (!bleInfo || !bleInfo.deviceId) return;
 
     console.log("[bleManager] 启动自动重连:", bleInfo.deviceId);
-    // 先确认蓝牙系统是否已经持有该连接，若是直接补一次密钥校验。
+    const self = this;
     wx.getConnectedBluetoothDevices({
       services: ["FFFF", "FEE7", "0001", "180D"],
-      success: (res) => {
-        const found = res.devices.find(
-          (d) => d.deviceId === bleInfo.deviceId
-        );
+      success: function (res) {
+        const found = res.devices.find(function (d) {
+          return d.deviceId === bleInfo.deviceId;
+        });
         if (found) {
-          // 系统层已连接，直接进入认证 + 状态同步流程
-          this.currentDevice = { ...bleInfo, ...found };
-          this.connected = true;
-          this.emit("reconnecting", this.currentDevice);
-          // 触发一次密钥校验，等 type=1 回调到来
-          setTimeout(() => {
+          self.currentDevice = Object.assign({}, bleInfo, found);
+          self.connected = true;
+          self.emit("reconnecting", self.currentDevice);
+          setTimeout(function () {
             try {
               veepooFeature.veepooBlePasswordCheckManager();
             } catch (e) {
@@ -73,61 +67,60 @@ class BleManager implements BleManagerLike {
             }
           }, 300);
         } else {
-          // 系统层未连接，走完整连接流程
-          this.connect(bleInfo, () => {
-            // 结果通过事件分发，不需要单独处理
+          self.connect(bleInfo, function () {
+            // 结果通过事件分发
           });
         }
       },
-      fail: () => {
-        // 蓝牙未开 / 未授权时静默退出，等用户手动操作
+      fail: function () {
+        // 蓝牙未开 / 未授权时静默退出
       },
     });
   }
 
-  startScan(cb: (devices: any[], err?: any) => void) {
-    const devices: any[] = [];
+  startScan(cb) {
+    const devices = [];
 
-    const pushUnique = (device: any) => {
-      const idx = devices.findIndex((d) => d.deviceId === device.deviceId);
+    function pushUnique(device) {
+      const idx = devices.findIndex(function (d) {
+        return d.deviceId === device.deviceId;
+      });
       if (idx === -1) devices.push(device);
-      else devices[idx] = { ...devices[idx], ...device };
-    };
+      else devices[idx] = Object.assign({}, devices[idx], device);
+    }
 
-    // iOS 兼容：先取一次系统已连接列表
     wx.getConnectedBluetoothDevices({
       services: ["FFFF", "FEE7", "0001", "180D"],
-      success: (res) => {
+      success: function (res) {
         res.devices.forEach(pushUnique);
         cb(devices.slice());
       },
     });
 
-    veepooBle.veepooWeiXinSDKStartScanDeviceAndReceiveScanningDevice(
-      (res: any) => {
-        if (res && res.errCode) {
-          cb(devices.slice(), res);
-          return;
-        }
-        if (res && res[0]) {
-          pushUnique(res[0]);
-          // 信号强度排序
-          devices.sort(
-            (a, b) => (b.RSSI || b.rssi || 0) - (a.RSSI || a.rssi || 0)
-          );
-          cb(devices.slice());
-        }
+    veepooBle.veepooWeiXinSDKStartScanDeviceAndReceiveScanningDevice(function (
+      res
+    ) {
+      if (res && res.errCode) {
+        cb(devices.slice(), res);
+        return;
       }
-    );
+      if (res && res[0]) {
+        pushUnique(res[0]);
+        devices.sort(function (a, b) {
+          return (b.RSSI || b.rssi || 0) - (a.RSSI || a.rssi || 0);
+        });
+        cb(devices.slice());
+      }
+    });
   }
 
-  stopScan(cb?: () => void) {
-    veepooBle.veepooWeiXinSDKStopSearchBleManager(() => {
+  stopScan(cb) {
+    veepooBle.veepooWeiXinSDKStopSearchBleManager(function () {
       if (cb) cb();
     });
   }
 
-  connect(device: any, cb: (ok: boolean, err?: any) => void) {
+  connect(device, cb) {
     if (!device || !device.deviceId) {
       cb(false, { errMsg: "缺少 deviceId" });
       return;
@@ -141,18 +134,17 @@ class BleManager implements BleManagerLike {
     this.connecting = true;
     this.currentDevice = device;
 
-    // 立即写入持久化，便于下次启动重连
     wx.setStorageSync("bleInfo", device);
     wx.setStorageSync("bleDate", device);
     wx.setStorageSync("deviceChipStatus", false);
 
+    const self = this;
     veepooBle.veepooWeiXinSDKBleConnectionServicesCharacteristicsNotifyManager(
       device,
-      (result: any) => {
+      function (result) {
         if (result && result.connection) {
-          this.connected = true;
-          // 物理连接成功，等待密钥校验
-          setTimeout(() => {
+          self.connected = true;
+          setTimeout(function () {
             try {
               veepooFeature.veepooBlePasswordCheckManager();
             } catch (e) {
@@ -160,34 +152,29 @@ class BleManager implements BleManagerLike {
             }
           }, 500);
 
-          // 等待 type=1 回调；最多 15s
           const start = Date.now();
-          const timer = setInterval(() => {
-            if (this.authed) {
+          const timer = setInterval(function () {
+            if (self.authed) {
               clearInterval(timer);
-              this.connecting = false;
-              this.reconnectAttempt = 0;
+              self.connecting = false;
+              self.reconnectAttempt = 0;
               cb(true);
               return;
             }
             if (Date.now() - start > 15000) {
               clearInterval(timer);
-              this.connecting = false;
-              this.connected = false;
-              cb(false, {
-                errMsg: "密钥校验超时",
-                errCode: "AUTH_TIMEOUT",
-              });
+              self.connecting = false;
+              self.connected = false;
+              cb(false, { errMsg: "密钥校验超时", errCode: "AUTH_TIMEOUT" });
             }
           }, 300);
         } else {
           const errCode = result && (result.errCode || result.code);
-          // 没有 errCode 时是中间状态推送，忽略，继续等
           if (!errCode) return;
 
-          this.connecting = false;
-          this.connected = false;
-          this.authed = false;
+          self.connecting = false;
+          self.connected = false;
+          self.authed = false;
           cb(false, result);
         }
       }
@@ -212,34 +199,37 @@ class BleManager implements BleManagerLike {
     this.emit("disconnected", { reason: "manual" });
   }
 
-  on(event: BleManagerEvent, fn: Listener) {
+  on(event, fn) {
     const arr = this.listeners[event] || (this.listeners[event] = []);
     arr.push(fn);
-    return () => this.off(event, fn);
+    const self = this;
+    return function () {
+      self.off(event, fn);
+    };
   }
 
-  once(event: BleManagerEvent, fn: Listener) {
-    const off = this.on(event, (...args: any[]) => {
+  once(event, fn) {
+    const off = this.on(event, function () {
       off();
-      fn(...args);
+      fn.apply(null, arguments);
     });
     return off;
   }
 
-  off(event: BleManagerEvent, fn: Listener) {
+  off(event, fn) {
     const arr = this.listeners[event];
     if (!arr) return;
     const idx = arr.indexOf(fn);
     if (idx >= 0) arr.splice(idx, 1);
   }
 
-  emit(event: BleManagerEvent, ...args: any[]) {
+  emit(event) {
     const arr = this.listeners[event];
     if (!arr) return;
-    // 拷贝一份，避免 fn 在执行过程中修改数组
-    arr.slice().forEach((fn) => {
+    const args = Array.prototype.slice.call(arguments, 1);
+    arr.slice().forEach(function (fn) {
       try {
-        fn(...args);
+        fn.apply(null, args);
       } catch (e) {
         console.error("[bleManager] listener 错误:", event, e);
       }
@@ -248,69 +238,66 @@ class BleManager implements BleManagerLike {
 
   // ---------- 内部 ----------
 
-  private registerMonitor() {
+  registerMonitor() {
     if (this.monitorRegistered) return;
     this.monitorRegistered = true;
-    veepooBle.veepooWeiXinSDKNotifyMonitorValueChange((e: any) => {
+    const self = this;
+    veepooBle.veepooWeiXinSDKNotifyMonitorValueChange(function (e) {
       if (!e) return;
-      // 密钥校验通过
       if (e.type === 1) {
-        const device: any = this.currentDevice || {};
+        const device = self.currentDevice || {};
         if (e.content) {
           device.VPDeviceVersion = e.content.VPDeviceVersion;
           device.VPDeviceMAC = e.content.VPDeviceMAC;
         }
-        this.currentDevice = device;
+        self.currentDevice = device;
         wx.setStorageSync("VPDevice", device);
         if (device.VPDeviceMAC) {
           wx.setStorageSync("connectedMac", device.VPDeviceMAC);
         }
         wx.setStorageSync("deviceChipStatus", true);
         wx.setStorageSync("connectionStatus", true);
-        this.authed = true;
-        this.connected = true;
-        this.emit("connected", device);
+        self.authed = true;
+        self.connected = true;
+        self.emit("connected", device);
         return;
       }
-      // 提醒数据
       if (e.type === 23) {
-        this.emit("reminderUpdate", e.content || {});
+        self.emit("reminderUpdate", e.content || {});
         return;
       }
-      // 抬腕亮屏
       if (e.type === 25) {
-        this.emit("lightUpTimeUpdate", e.content || {});
+        self.emit("lightUpTimeUpdate", e.content || {});
         return;
       }
-      // 常灭屏 (SDK 暂未明确 type，用 name 判断)
       if (e.name === "ZT163ScreenKillFunction" || e.type === "screenKill") {
-        this.emit("screenKillUpdate", e.content || e);
+        self.emit("screenKillUpdate", e.content || e);
         return;
       }
     });
   }
 
-  private registerBleStateChange() {
+  registerBleStateChange() {
     if (this.bleStateRegistered) return;
     this.bleStateRegistered = true;
-    wx.onBLEConnectionStateChange((res) => {
+    const self = this;
+    wx.onBLEConnectionStateChange(function (res) {
       console.log("[bleManager] BLE 连接状态变化:", res);
-      const cur = this.currentDevice;
+      const cur = self.currentDevice;
       if (!res.connected) {
-        const wasAuthed = this.authed;
-        this.connected = false;
-        this.authed = false;
+        const wasAuthed = self.authed;
+        self.connected = false;
+        self.authed = false;
         wx.setStorageSync("connectionStatus", false);
-        // 仅当之前确实建立过连接，且本地仍保留 bleInfo 时才尝试自动重连
         const bleInfo = wx.getStorageSync("bleInfo");
         if (wasAuthed && bleInfo && bleInfo.deviceId) {
-          this.emit("disconnected", {
+          self.emit("disconnected", {
             reason: "ble_lost",
             deviceId: cur && cur.deviceId,
           });
-          this.scheduleReconnect();
+          self.scheduleReconnect();
         } else {
-          this.emit("disconnected", {
+          self.emit("disconnected", {
             reason: "ble_lost",
             deviceId: cur && cur.deviceId,
           });
@@ -319,21 +306,21 @@ class BleManager implements BleManagerLike {
     });
   }
 
-  private registerAppLifecycle() {
+  registerAppLifecycle() {
     if (this.appShowRegistered) return;
     this.appShowRegistered = true;
-    wx.onAppShow(() => {
-      // 切回前台时若已不在连接状态，尝试一次重连
-      if (!this.isConnected() && !this.connecting) {
+    const self = this;
+    wx.onAppShow(function () {
+      if (!self.isConnected() && !self.connecting) {
         const bleInfo = wx.getStorageSync("bleInfo");
         if (bleInfo && bleInfo.deviceId) {
-          this.scheduleReconnect(true);
+          self.scheduleReconnect(true);
         }
       }
     });
   }
 
-  private scheduleReconnect(immediate = false) {
+  scheduleReconnect(immediate) {
     if (this.connecting) return;
     if (this.reconnectAttempt >= RECONNECT_INTERVALS_MS.length) {
       console.warn("[bleManager] 达到最大重连次数，停止重连");
@@ -343,20 +330,21 @@ class BleManager implements BleManagerLike {
     const delay = immediate ? 0 : RECONNECT_INTERVALS_MS[this.reconnectAttempt];
     this.reconnectAttempt++;
     this.cancelReconnect();
-    this.emit("reconnecting", { attempt: this.reconnectAttempt, delay });
-    this.reconnectTimer = setTimeout(() => {
+    this.emit("reconnecting", { attempt: this.reconnectAttempt, delay: delay });
+    const self = this;
+    this.reconnectTimer = setTimeout(function () {
       const bleInfo = wx.getStorageSync("bleInfo");
       if (!bleInfo || !bleInfo.deviceId) return;
-      this.connect(bleInfo, (ok, err) => {
+      self.connect(bleInfo, function (ok, err) {
         if (!ok) {
           console.warn("[bleManager] 重连失败，准备下一次:", err);
-          this.scheduleReconnect();
+          self.scheduleReconnect();
         }
       });
     }, delay);
   }
 
-  private cancelReconnect() {
+  cancelReconnect() {
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
@@ -364,9 +352,9 @@ class BleManager implements BleManagerLike {
   }
 }
 
-let _instance: BleManager | null = null;
+let _instance = null;
 
-export function getBleManager(): BleManager {
+export function getBleManager() {
   if (!_instance) {
     _instance = new BleManager();
   }
