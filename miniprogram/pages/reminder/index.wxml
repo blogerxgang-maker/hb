@@ -9,6 +9,29 @@
 
   <block wx:else>
 
+    <!-- 状态同步占位 -->
+    <view wx:if="{{syncing}}" class="card syncing-card">
+      <view class="loading-spinner"></view>
+      <text class="syncing-text">正在同步设备状态…</text>
+    </view>
+
+    <!-- 显示开关卡片：常灭屏 -->
+    <view class="card">
+      <text class="card-title">显示开关</text>
+      <view class="switch-item">
+        <view class="switch-info">
+          <text class="switch-title">常灭屏</text>
+          <text class="switch-status {{alwaysOff ? 'on' : 'off'}}">{{alwaysOffText}}</text>
+        </view>
+        <switch
+          checked="{{alwaysOff}}"
+          bindchange="onAlwaysOffChange"
+          color="#2F3133"
+          disabled="{{!isConnected || syncing}}"
+        />
+      </view>
+    </view>
+
     <!-- 时间卡片 -->
     <view class="card time-card">
       <text class="card-title">提醒时间</text>
@@ -54,10 +77,6 @@
           <view class="mode-dot"></view>
           <text>{{item.name}}</text>
         </view>
-      </view>
-      
-      <view class="mode-desc">
-        {{modeDescription}}
       </view>
     </view>
 

@@ -1,67 +1,11 @@
 {
   "pages": [
     "pages/connect/index",
-    "pages/healthData/index",
-    "pages/reminder/index",
-    "pages/settings/index",
-    "pages/index/index",
-    "pages/logs/logs",
-    "pages/sleep/index",
-    "pages/bleConnection/index",
-    "pages/uiStyle/index",
-    "pages/unitSetting/index",
-    "pages/alarmClock/index",
-    "pages/bodyTemperature/index",
-    "pages/bodyTemperatureAuto/index",
-    "pages/ecgRead/index",
-    "pages/ecgTest/index",
-    "pages/readDailyData/index",
-    "pages/step/index",
-    "pages/weatherForecast/index",
-    "pages/movementPattern/index",
-    "pages/dial/addDial/index",
-    "pages/dial/index",
-    "pages/testJieliBleCon/index",
-    "pages/dial/addBg/index",
-    "pages/lookPhone/index",
-    "pages/universalBlood/index",
-    "pages/screenSetup/index",
-    "pages/heartRateAlarm/index",
-    "pages/dial/addBg/dial_bg_image/index",
-    "pages/bloodComponent/index",
-    "pages/bloodGlucose/index",
-    "pages/ota/index",
-    "pages/sedentaryToast/index",
-    "pages/takeAPicture/index",
-    "pages/brightScreen/index",
-    "pages/ANCSToast/index",
-    "pages/healthToast/index",
-    "pages/bloodOxygen/index",
-    "pages/bloodOxygen2/index",
-    "pages/switchSetup/index",
-    "pages/otaNavite/index",
-    "pages/ECGMultipleLeads/index",
-    "pages/dialBackground/index",
-    "pages/dialBackground/background_image/index",
-    "pages/xdt/index",
-    "pages/pttTest/index",
-    "pages/waveform/index",
-    "pages/syncTime/index",
-    "pages/volume/index",
-    "pages/networkDial/index",
-    "pages/heartRateTest/index",
-    "pages/languagePage/index",
-    "pages/manualMeasurement/index",
-    "pages/skinColorSetting/index",
-    "pages/microCheck/index",
-    "pages/sos/index",
-    "pages/b3AutoTestFeature/b3AutoTestFeature",
-    "pages/JH58/index",
-    "pages/commonreminder/index"
+    "pages/reminder/index"
   ],
   "window": {
     "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "蓝牙设备",
+    "navigationBarTitleText": "蓝牙手环",
     "navigationBarBackgroundColor": "#ffffff"
   },
   "tabBar": {
@@ -77,22 +21,10 @@
         "selectedIconPath": "image/tab_connect_active.png"
       },
       {
-        "pagePath": "pages/healthData/index",
-        "text": "健康数据",
-        "iconPath": "image/tab_health.png",
-        "selectedIconPath": "image/tab_health_active.png"
-      },
-      {
         "pagePath": "pages/reminder/index",
-        "text": "自觉提醒",
+        "text": "提醒",
         "iconPath": "image/tab_reminder.png",
         "selectedIconPath": "image/tab_reminder_active.png"
-      },
-      {
-        "pagePath": "pages/settings/index",
-        "text": "设置",
-        "iconPath": "image/tab_settings.png",
-        "selectedIconPath": "image/tab_settings_active.png"
       }
     ]
   },

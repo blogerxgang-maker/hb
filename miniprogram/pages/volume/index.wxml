@@ -1,4 +1,0 @@
-<view>
-  <button catch:tap="remove">-</button>
-  <button catch:tap="add">+</button>
-</view>

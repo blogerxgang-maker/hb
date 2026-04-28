@@ -6,6 +6,7 @@
       <view class="status-icon-circle {{connectionStatus}}">
         <text wx:if="{{connectionStatus === 'disconnected'}}">○</text>
         <text wx:elif="{{connectionStatus === 'scanning'}}">◎</text>
+        <text wx:elif="{{connectionStatus === 'connecting'}}">◐</text>
         <text wx:else>●</text>
       </view>
     </view>
@@ -62,6 +63,15 @@
     >
       <view class="loading-spinner"></view>
       停止扫描
+    </button>
+
+    <button
+      wx:if="{{connectionStatus === 'connecting'}}"
+      class="btn btn-secondary"
+      disabled="true"
+    >
+      <view class="loading-spinner"></view>
+      连接中…
     </button>
     
     <button 
