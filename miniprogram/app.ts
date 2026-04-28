@@ -3,11 +3,8 @@
 // 以兼容某些 IDE 在根目录 app.ts 上未启用 TS preset 时的 Babel 解析。
 // @ts-nocheck
 
-import { veepooJLBle } from "./jieli_sdk/bleInit";
 import { getBleManager } from "./utils/bleManager";
 import { syncDeviceStateAfterConnect } from "./utils/reminderQueue";
-
-const vpJLBle = new veepooJLBle();
 
 // 全局注入分享逻辑（保留原有行为）
 const originalPage = Page;
@@ -54,9 +51,6 @@ App({
 
     // 启动时连接状态默认置为未连接，待 bleManager 触发 connected 事件再置 true
     wx.setStorageSync("connectionStatus", false);
-
-    // 杰里 SDK 蓝牙初始化（保留原逻辑，蓝牙底层依赖）
-    vpJLBle.init();
 
     // 全局蓝牙管理器（单例）
     const bleManager = getBleManager();
