@@ -1,0 +1,23 @@
+<view class="box">
+  <view class="tongyong-blood">
+
+    <view style="line-height: 70rpx;">进度：{{univerData.Progress}}</view>
+    <view style="line-height: 70rpx;">高压：{{univerData.content.bloodPressureHigh}}</view>
+    <view style="line-height: 70rpx;">低压：{{univerData.content.bloodPressureLow}}</view>
+  </view>
+  <view style="margin-bottom: 15rpx;"><button catch:tap="startTest">开启通用血压测量</button></view>
+  <view style="margin-bottom: 15rpx;"><button catch:tap="stopTest">关闭通用血压测量</button></view>
+
+  <view style="padding: 20px;">
+    <view><input style="padding: 10rpx; background-color: aliceblue; margin-bottom: 30rpx;" bindinput="value1" type="text" placeholder="高压" /></view>
+    <view><input style="padding: 10rpx; background-color: aliceblue; margin-bottom: 30rpx;" bindinput="value2" type="text" placeholder="低压" /></view>
+  </view>
+  <view style="margin-bottom: 15rpx;"><button catch:tap="startBlood">设置私人血压定制</button></view>
+  <view style="margin-bottom: 15rpx;"><button catch:tap="stopBlood">关闭血压私人定制</button></view>
+  <view style="margin-bottom: 15rpx;"><button catch:tap="readBlood">读取血压私人定制</button></view>
+
+<view style="height: 50rpx;" ></view>
+  <view style="margin-bottom: 15rpx;"><button catch:tap="startPrivateTest">开启血压私人测量</button></view>
+  <view style="margin-bottom: 15rpx;"><button catch:tap="stopPrivateTest">关闭血压私人测量</button></view>
+
+</view>

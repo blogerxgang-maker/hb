@@ -1,0 +1,8 @@
+<!--pages/function_test/dial_operate/dial_add_background/index.wxml-->
+<view style="height: 100rpx;"></view>
+<view  class="blue-btn" catchtap="clickWay1">裁剪图片</view>
+<view style="height: 100rpx;"></view>
+<!-- <view  class="blue-btn" catchtap="clickWay2">方式二:传输资源文件</view> -->
+<view style="height: 100rpx;"></view>
+<view  class="blue-btn" catchtap="clickCancelTransfer">取消传输</view>
+<view>{{transferProgressText}}</view>

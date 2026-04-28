@@ -1,0 +1,256 @@
+.container {
+  min-height: 100vh;
+  background: #FAFAFA;
+  padding-bottom: 120rpx;
+}
+
+/* 顶部状态栏 */
+.status-bar {
+  background: #fff;
+  padding: 30rpx 40rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
+  .mac-info {
+    font-size: 24rpx;
+    color: #78909C;
+    font-family: monospace;
+  }
+
+  .sync-status {
+    font-size: 26rpx;
+    color: #4DB6AC;
+    font-weight: 500;
+  }
+}
+
+/* 闹钟列表 */
+.alarm-list {
+  padding: 20rpx;
+
+  .alarm-item {
+    background: #fff;
+    border-radius: 24rpx;
+    padding: 30rpx 40rpx;
+    margin-bottom: 20rpx;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+
+    &:active {
+      transform: scale(0.98);
+      background: #FAFAFA;
+    }
+
+    .item-left {
+      flex: 1;
+
+      .time {
+        font-size: 64rpx;
+        font-weight: bold;
+        color: #37474F;
+        line-height: 1;
+      }
+
+      .content {
+        font-size: 28rpx;
+        color: #78909C;
+        margin-top: 10rpx;
+        display: block;
+      }
+
+      .repeat {
+        font-size: 24rpx;
+        color: #B0BEC5;
+        margin-top: 6rpx;
+      }
+    }
+
+    .item-right {
+      display: flex;
+      align-items: center;
+      gap: 30rpx;
+
+      .delete-btn {
+        padding: 20rpx;
+        margin-right: -10rpx;
+        
+        .icon-delete {
+          width: 40rpx;
+          height: 40rpx;
+          opacity: 0.8; /* 提高不透明度，确保可见 */
+        }
+      }
+    }
+  }
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 200rpx;
+
+  .empty-img {
+    width: 200rpx;
+    height: 200rpx;
+    opacity: 0.2;
+  }
+
+  .empty-text {
+    font-size: 28rpx;
+    color: #78909C;
+    margin-top: 40rpx;
+  }
+}
+
+/* 悬浮按钮 - 使用柔和蓝绿色 */
+.fab {
+  position: fixed;
+  right: 40rpx;
+  bottom: 60rpx;
+  width: 110rpx;
+  height: 110rpx;
+  background: linear-gradient(135deg, #4DB6AC, #26A69A);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10rpx 30rpx rgba(77, 182, 172, 0.4);
+  color: #fff;
+  font-size: 60rpx;
+  font-weight: 300;
+  z-index: 99;
+
+  &:active {
+    transform: scale(0.9);
+    box-shadow: 0 5rpx 15rpx rgba(77, 182, 172, 0.4);
+  }
+}
+
+/* 弹窗对话框 */
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  width: 85%;
+  background: #fff;
+  border-radius: 32rpx;
+  padding: 40rpx;
+  animation: modalIn 0.3s ease-out;
+
+  .modal-title {
+    font-size: 36rpx;
+    font-weight: bold;
+    color: #37474F;
+    text-align: center;
+    margin-bottom: 40rpx;
+  }
+
+  .form-item {
+    margin-bottom: 30rpx;
+
+    .label {
+      font-size: 26rpx;
+      color: #78909C;
+      margin-bottom: 16rpx;
+      display: block;
+    }
+
+    .input-box {
+      background: #FAFAFA;
+      border-radius: 16rpx;
+      padding: 20rpx 30rpx;
+      font-size: 30rpx;
+      color: #37474F;
+    }
+
+    .time-picker {
+      background: #E0F2F1;
+      border-radius: 16rpx;
+      padding: 20rpx 30rpx;
+      font-size: 40rpx;
+      font-weight: bold;
+      text-align: center;
+      color: #4DB6AC;
+    }
+  }
+
+  .repeat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16rpx;
+    margin-top: 20rpx;
+
+    .repeat-chip {
+      background: #FAFAFA;
+      border-radius: 12rpx;
+      padding: 16rpx 0;
+      text-align: center;
+      font-size: 24rpx;
+      color: #78909C;
+      transition: all 0.2s;
+
+      &.active {
+        background: #4DB6AC;
+        color: #fff;
+      }
+    }
+  }
+
+  .modal-btns {
+    display: flex;
+    gap: 20rpx;
+    margin-top: 50rpx;
+
+    button {
+      flex: 1;
+      height: 90rpx;
+      line-height: 90rpx;
+      border-radius: 45rpx;
+      font-size: 30rpx;
+      font-weight: 500;
+
+      &.btn-cancel {
+        background: #ECEFF1;
+        color: #78909C;
+      }
+
+      &.btn-confirm {
+        background: #4DB6AC;
+        color: #fff;
+      }
+    }
+  }
+}
+
+@keyframes modalIn {
+  from {
+    transform: translateY(100rpx);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

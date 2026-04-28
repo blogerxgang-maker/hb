@@ -1,0 +1,18 @@
+<!--pages/function_test/dial_operate/dial_add_background/index.wxml-->
+
+<view class="root-view" wx:if="{{stats}}">
+  <view class="top-content" id="test">
+    <canvas style="width: 100%;height: 100%;" canvas-id="shareFrends" capture-bind:touchstart="touchstart" capture-bind:touchmove="touchmove" capture-bind:touchend="touchend"></canvas>
+  </view>
+  <view class="bottom-content">
+    <view class="btn-white" catchtap="clickCancel">取消</view>
+    <!-- <view class="btn-white" catchtap="clickOverturn">翻转</view> -->
+    <view class="btn-white" catchtap="clickSelect">选取</view>
+  </view>
+</view>
+<canvas wx:if="{{stats}}" style="width: {{devScreenWidth}}px;height: {{devScreenHeight}}px;" canvas-id="shareFrends2"></canvas>
+<canvas  style="width: {{devScreenWidth}}px;height: {{devScreenHeight}}px;" canvas-id="shareFrends3"></canvas>
+
+<canvas wx:if="{{stats}}" canvas-id="myCanvas" type="2d" id="myCanvas" style="position:relative;top: 50%;left: 50%;transform: translate(-50%,-50%);width: 290px;height:390px;box-sizing:border-box;"></canvas>
+
+<!-- <image style="padding: 40rpx; background-color: red; position: fixed; top: 20rpx;" src="{{srcImagePath}}" mode=""/> -->

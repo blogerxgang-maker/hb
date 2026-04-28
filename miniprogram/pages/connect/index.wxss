@@ -1,0 +1,266 @@
+/* 连接页样式 - 健康友好配色 */
+
+/* 全局页面背景 */
+page {
+  background-color: #FAFAFA;
+  min-height: 100vh;
+}
+
+.container {
+  padding: 24rpx;
+  padding-bottom: 40rpx;
+}
+
+/* 通用卡片样式 - 阴影代替描边 */
+.card {
+  background-color: #ffffff;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+
+/* 状态卡片 */
+.status-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48rpx 32rpx;
+}
+
+.status-icon {
+  width: 120rpx;
+  height: 120rpx;
+  margin-bottom: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-icon-circle {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-icon-circle.disconnected {
+  background-color: #ECEFF1;
+}
+
+.status-icon-circle.scanning {
+  background-color: #B2DFDB;
+  animation: pulse 1.5s infinite;
+}
+
+.status-icon-circle.connected {
+  background-color: #B2DFDB;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.status-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #37474F;
+  margin-bottom: 12rpx;
+}
+
+.status-subtitle {
+  font-size: 28rpx;
+  color: #78909C;
+  text-align: center;
+}
+
+/* 设备列表卡片 */
+.device-list-card {
+  padding: 0;
+}
+
+.card-header {
+  padding: 32rpx;
+  border-bottom: 1rpx solid #ECEFF1;
+}
+
+.card-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #37474F;
+}
+
+.device-list {
+  max-height: 600rpx;
+  overflow-y: auto;
+}
+
+.device-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28rpx 32rpx;
+  border-bottom: 1rpx solid #ECEFF1;
+}
+
+.device-item:last-child {
+  border-bottom: none;
+}
+
+.device-item:active {
+  background-color: #FAFAFA;
+}
+
+.device-info {
+  flex: 1;
+}
+
+.device-name {
+  font-size: 30rpx;
+  color: #37474F;
+  margin-bottom: 8rpx;
+}
+
+.device-mac {
+  font-size: 24rpx;
+  color: #78909C;
+}
+
+.device-rssi {
+  font-size: 24rpx;
+  color: #78909C;
+  margin-left: 16rpx;
+}
+
+.empty-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 32rpx;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  color: #B0BEC5;
+  margin-bottom: 24rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #78909C;
+}
+
+/* 底部按钮条 */
+.button-bar {
+  display: flex;
+  gap: 24rpx;
+  margin-top: 16rpx;
+}
+
+.btn {
+  flex: 1;
+  height: 88rpx;
+  border-radius: 16rpx;
+  font-size: 30rpx;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+}
+
+.btn::after {
+  border: none;
+}
+
+.btn-primary {
+  background-color: #4DB6AC;
+  color: #ffffff;
+}
+
+.btn-primary:active {
+  background-color: #00897B;
+}
+
+.btn-primary.disabled {
+  background-color: #B0BEC5;
+  color: #ffffff;
+}
+
+.btn-secondary {
+  background-color: #E0F2F1;
+  color: #00897B;
+}
+
+.btn-secondary:active {
+  background-color: #B2DFDB;
+}
+
+.btn-danger {
+  background-color: #FFEBEE;
+  color: #C62828;
+}
+
+.btn-danger:active {
+  background-color: #FFCDD2;
+}
+
+/* 加载动画 */
+.loading-spinner {
+  width: 40rpx;
+  height: 40rpx;
+  border: 4rpx solid #B2DFDB;
+  border-top: 4rpx solid #4DB6AC;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 16rpx;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 常见问题排查卡片 */
+.troubleshooting-card {
+  margin-top: 32rpx;
+  background-color: #E0F2F1; /* 浅蓝绿背景 */
+  box-shadow: none;
+  border: 1rpx solid #B2DFDB;
+}
+
+.troubleshooting-card .card-title {
+  color: #00897B;
+  font-size: 28rpx;
+}
+
+.troubleshooting-list {
+  padding: 16rpx 32rpx 32rpx;
+}
+
+.trouble-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 12rpx;
+}
+
+.trouble-item:last-child {
+  margin-bottom: 0;
+}
+
+.trouble-dot {
+  color: #4DB6AC;
+  margin-right: 12rpx;
+  font-weight: bold;
+}
+
+.trouble-text {
+  font-size: 24rpx;
+  color: #546E7A;
+  line-height: 1.4;
+}

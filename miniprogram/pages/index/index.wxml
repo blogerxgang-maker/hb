@@ -1,0 +1,31 @@
+<view class="main-box">
+  <view class="top-buttom">
+    <view class="buttom" catch:tap="skipDeviceGet">设备扫描</view>
+    <view class="buttom buttom-active {{ connected ? 'active' : '' }}" catch:tap="closeBluetoothAdapterManager">断开连接</view>
+    <!-- <view class="buttom" catch:tap="getF003">获取F003</view> -->
+    <!-- <view class="buttom buttom-active" catch:tap="connectBle2">重新连接</view> -->
+  </view>
+  <!-- 显示设备相关信息 -->
+  <view class="deviceInfo" catch:tap="blePwd">
+    <view>
+      <text>设备名称：{{device.name}}</text>
+    </view>
+    <view>
+      <text>MAC地址：{{device.VPDeviceMAC}}</text>
+    </view>
+    <view>
+      <text style="color: #010203;">固件版本：{{device.VPDeviceVersion}}</text>
+    </view>
+    <view>
+      <text>电池电量：{{device.VPDeviceElectricPercent}}</text>
+    </view>
+    <view>
+      <text>实时步数：{{device.step}} <text wx:if="{{device.distance}}">{{device.distance}}m </text> <text wx:if="{{device.calorie}}">{{device.calorie}}kcal</text> </text>
+    </view>
+  </view>
+
+  <!-- 页面渲染 -->
+  <view class="page-box">
+    <view class="page-item" wx:for="{{listDate}}" wx:key="index" catch:tap="skipPages" data-path="{{item.path}}">{{item.name}}</view>
+  </view>
+</view>

@@ -1,0 +1,73 @@
+<view class="box">
+  <view>测试进度：{{device.progress}}</view>
+  <view class="body-item">
+    <view class="item-left">BMI</view>
+    <view class="item-left">{{device.content.BMI}}</view>
+  </view>
+  <view class="body-item">
+    <view class="item-left"> 体脂率</view>
+    <view class="item-left">{{device.content.bodyFatPercentage}}</view>
+  </view>
+  <view class="body-item">
+    <view class="item-left">脂肪量</view>
+    <view class="item-left">{{device.content.fatMass}}</view>
+  </view>
+  <view class="body-item">
+    <view class="item-left">去脂体重</view>
+    <view class="item-left">{{device.content.leanBodyMass}}</view>
+  </view>
+  <view class="body-item">
+    <view class="item-left">肌肉率</view>
+    <view class="item-left">{{device.content.muscleRate}}</view>
+  </view>
+  <view class="body-item">
+    <view class="item-left">肌肉量</view>
+    <view class="item-left">{{device.content.muscleMass}}</view>
+  </view>
+  <view class="body-item">
+    <view class="item-left">皮下脂肪</view>
+    <view class="item-left">{{device.content.subcutaneousFat}}</view>
+  </view>
+  <view class="body-item">
+    <view class="item-left"> 体内水分</view>
+    <view class="item-left">{{device.content.bodyMoisture}}</view>
+  </view>
+  <view class="body-item">
+    <view class="item-left">含水量</view>
+    <view class="item-left">{{device.content.waterContent}}</view>
+  </view>
+  <view class="body-item">
+    <view class="item-left">骨骼肌率</view>
+    <view class="item-left">{{device.content.skeletalMuscleRate}}</view>
+  </view>
+  <view class="body-item">
+    <view class="item-left">骨量</view>
+    <view class="item-left">{{device.content.boneMass}}</view>
+  </view>
+  <view class="body-item">
+    <view class="item-left">蛋白质占比</view>
+    <view class="item-left">{{device.content.proportionOfProtein}}</view>
+  </view>
+  <view class="body-item">
+    <view class="item-left"> 蛋白质量</view>
+    <view class="item-left">{{device.content.proteinAmount}}</view>
+  </view>
+  <view class="body-item">
+    <view class="item-left">基础代谢率</view>
+    <view class="item-left">{{device.content.basalMetabolicRate}}</view>
+  </view>
+
+  <button style="margin: 30rpx auto;" catch:tap="BodyCompositionTestStartDataManager">开始检测</button>
+  <button catch:tap="BodyCompositionTestStopDataManager">关闭检测</button>
+
+  <view class="box-idType" style="margin-top: 50rpx;">
+    
+     <view>为空表示没有ID</view>
+    <view wx:for="{{deviceIdList}}" wx:key="index">数据ID：{{item.dataId}}</view>
+    <button style="margin: 30rpx auto;" catch:tap="startGetDataId">获取成分数据ID</button>
+    <button style="margin: 30rpx auto;" catch:tap="dataIdGetData">根据ID获取数据</button>
+
+
+  </view>
+
+</view>

@@ -1,0 +1,43 @@
+<view class="box">
+  <view style="margin-bottom: 15rpx;"><button catch:tap="startTest">校准开始测量</button></view>
+  <view style="margin-bottom: 15rpx;"><button catch:tap="noCalibrationStartTest">不校准开始测量</button></view>
+  <view style="margin-bottom: 15rpx;"><button catch:tap="stopTest">结束测量</button></view>
+  <view>
+    <text>血液值看日志</text>
+    <view>进度：{{Blood.Progress}}</view>
+
+    <view style="height: 100rpx;"></view>
+
+    <view class="box-input">
+      <view class="input-item">
+        <view>尿酸值</view>
+        <view><input type="text" bindinput="inputValue1" style="background-color: aliceblue; padding: 0 15rpx; margin-left: 20rpx;" placeholder="90-1000 u mol/L" /></view>
+      </view>
+      <view class="input-item">
+        <view>总胆固醇</view>
+        <view><input type="text" bindinput="inputValue2" style="background-color: aliceblue; padding: 0 15rpx; margin-left: 20rpx;" placeholder="0.01-20 u mol/L" /></view>
+      </view>
+      <view class="input-item">
+        <view>甘油三脂</view>
+        <view><input type="text" bindinput="inputValue3" style="background-color: aliceblue; padding: 0 15rpx; margin-left: 20rpx;" placeholder="0.01-20 u mol/L" /></view>
+      </view>
+      <view class="input-item">
+        <view>高密度脂蛋白</view>
+        <view><input type="text" bindinput="inputValue4" style="background-color: aliceblue; padding: 0 15rpx; margin-left: 20rpx;" placeholder="0.01-20 u mol/L" /></view>
+      </view>
+      <view class="input-item">
+        <view>低密度脂蛋白</view>
+        <view><input type="text" bindinput="inputValue5" style="background-color: aliceblue; padding: 0 15rpx; margin-left: 20rpx;" placeholder="0.01-20 u mol/L" /></view>
+      </view>
+
+      <view class="section">
+      <view class="section__title">开关：</view>
+      <switch checked="{{deviceSwitch}}" bindchange="bindSwitchChange" />
+    </view>
+
+    </view>
+
+    <view style="margin-bottom: 15rpx;"><button catch:tap="startCheckTest">设置血液校准测量</button></view>
+    <view style="margin-bottom: 15rpx;"><button catch:tap="readCheckTest">读取血液校准测量</button></view>
+  </view>
+</view>

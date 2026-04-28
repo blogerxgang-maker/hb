@@ -1,0 +1,56 @@
+<view>
+  <view style="padding: 30rpx;">
+    <view class="section">
+      <view class="section__title">时间上方：</view>
+      <picker bindchange="bindPickerChange1" value="{{index1}}" range="{{array1}}">
+        <view class="picker">
+          {{array1[index1]}}
+        </view>
+      </picker>
+    </view>
+    <view class="section">
+      <view class="section__title">时间下方：</view>
+      <picker bindchange="bindPickerChange2" value="{{index2}}" range="{{array2}}">
+        <view class="picker">
+          {{array2[index2]}}
+        </view>
+      </picker>
+    </view>
+    <view class="section">
+      <view class="section__title">时间位置：</view>
+      <picker bindchange="bindPickerChange3" value="{{index3}}" range="{{array3}}">
+        <view class="picker">
+          {{array3[index3]}}
+        </view>
+      </picker>
+    </view>
+    <view>
+      <view class="view-color-slider">
+        <view style="width:160rpx;height:160rpx;border-radius:80rpx;background:{{blockColor}}"></view>
+        <slider class="slider-color-picker" style="width:500rpx;height:30rpx;border-radius:10rpx;margin-left:30rpx" activeColor="transparent" backgroundColor="transparent" bindchange="changeCorlor" block-size="24" value="{{sliderValue}}"></slider>
+        <slider class="slider-color-picker-gamut" style="width:500rpx;height:30rpx;border-radius:10rpx;margin-left:30rpx;background:{{colorGamut}}" activeColor="transparent" backgroundColor="transparent" bindchange="changeCorlorGamut" block-size="24" value="{{sliderValue}}"></slider>
+        <slider class="slider-color-picker-gray" style="width:500rpx;height:30rpx;border-radius:10rpx;margin-left:30rpx;background:{{colorGray}}" activeColor="transparent" backgroundColor="transparent" bindchange="changeCorlorGray" block-size="24" value="{{sliderValue}}"></slider>
+      </view>
+
+    </view>
+  </view>
+  <view class="box-btn" style="margin: 20rpx 0; ">
+    <button catch:tap="SetCustomBackground">设置自定义背景样式</button>
+  </view>
+  <view class="box-btn" style="margin: 20rpx 0; ">
+    <button catch:tap="switchCustomBg">切换自定义背景</button>
+  </view>
+  <view class="box-btn" style="margin: 20rpx 0; ">
+    <button catch:tap="readCustomBackground">读取自定义背景</button>
+  </view>
+
+  <view class="box-btn" style="margin: 20rpx 0;">
+    <button catch:tap="getDialInfo">获取屏幕信息</button>
+  </view>
+
+  <view style="padding: 30rpx;">
+    <view>边框：{{border}}</view>
+    <view>屏幕大小：{{resolution}}</view>
+    <view>缩略图大小：{{thumbnails}}</view>
+  </view>
+</view>

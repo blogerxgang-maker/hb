@@ -1,0 +1,104 @@
+<!--pages/connect/index.wxml-->
+<view class="container">
+  <!-- 顶部状态卡 -->
+  <view class="card status-card">
+    <view class="status-icon">
+      <view class="status-icon-circle {{connectionStatus}}">
+        <text wx:if="{{connectionStatus === 'disconnected'}}">○</text>
+        <text wx:elif="{{connectionStatus === 'scanning'}}">◎</text>
+        <text wx:else>●</text>
+      </view>
+    </view>
+    <text class="status-title">{{statusTitle}}</text>
+    <text class="status-subtitle">{{statusSubtitle}}</text>
+  </view>
+
+  <!-- 中部设备列表卡 -->
+  <view class="card device-list-card">
+    <view class="card-header">
+      <text class="card-title">设备列表</text>
+    </view>
+    <scroll-view 
+      class="device-list" 
+      scroll-y 
+      refresher-enabled="{{true}}"
+      refresher-triggered="{{isRefreshing}}"
+      bindrefresherrefresh="onRefresh"
+    >
+      <view wx:if="{{bleList.length === 0}}" class="empty-list">
+        <text class="empty-icon">📱</text>
+        <text class="empty-text">{{connectionStatus === 'scanning' ? '正在搜索设备...' : '暂无发现设备'}}</text>
+      </view>
+      <view 
+        wx:for="{{bleList}}" 
+        wx:key="deviceId" 
+        class="device-item"
+        bindtap="onDeviceClick"
+        data-deviceid="{{item.deviceId}}"
+      >
+        <view class="device-info">
+          <text class="device-name">{{item.name || item.deviceName || '未知设备'}}</text>
+          <text class="device-mac">{{item.deviceId}}</text>
+        </view>
+        <text class="device-rssi">{{item.RSSI || item.rssi}} dBm</text>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 底部按钮条 -->
+  <view class="button-bar">
+    <button 
+      wx:if="{{connectionStatus === 'disconnected'}}"
+      class="btn btn-primary" 
+      bindtap="startScan"
+    >
+      开始扫描
+    </button>
+    
+    <button 
+      wx:if="{{connectionStatus === 'scanning'}}"
+      class="btn btn-secondary" 
+      bindtap="stopScan"
+    >
+      <view class="loading-spinner"></view>
+      停止扫描
+    </button>
+    
+    <button 
+      wx:if="{{connectionStatus === 'connected'}}"
+      class="btn btn-danger" 
+      bindtap="disconnect"
+    >
+      断开连接
+    </button>
+  </view>
+
+  <!-- 常见问题排查 -->
+  <view class="card troubleshooting-card">
+    <view class="card-header">
+      <text class="card-title">连接遇到困难？</text>
+    </view>
+    <view class="troubleshooting-list">
+      <view class="trouble-item">
+        <text class="trouble-dot">•</text>
+        <text class="trouble-text">请确保手机蓝牙已开启</text>
+      </view>
+      <view class="trouble-item">
+        <text class="trouble-dot">•</text>
+        <text class="trouble-text">请确保设备电量充足且在手机附近</text>
+      </view>
+      <view class="trouble-item">
+        <text class="trouble-dot">•</text>
+        <text class="trouble-text">iOS用户：请在系统设置中允许微信使用蓝牙</text>
+      </view>
+      <view class="trouble-item">
+        <text class="trouble-dot">•</text>
+        <text class="trouble-text">Android用户：请确保手机定位(GPS)已开启</text>
+      </view>
+      <view class="trouble-item">
+        <text class="trouble-dot">•</text>
+        <text class="trouble-text">若设备已被其他手机连接，请先断开</text>
+      </view>
+    </view>
+  </view>
+</view>

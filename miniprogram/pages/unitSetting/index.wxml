@@ -1,0 +1,57 @@
+<view class="box">
+  <view class="unit-setting">
+    <view class="unit-item">
+      <view class="item-left">长度单位</view>
+      <view class="item-left">
+        <picker bindchange="bindPickerChange1" value="{{index}}" range="{{array1}}">
+          <view class="picker">
+            {{unitLength}}
+          </view>
+        </picker>
+      </view>
+    </view>
+    <view class="unit-item">
+      <view class="item-left">体温单位</view>
+      <view class="item-left">
+        <picker bindchange="bindPickerChange2" value="{{index}}" range="{{array2}}">
+          <view class="picker">
+            {{unitBodyTemperature}}
+          </view>
+        </picker>
+      </view>
+    </view>
+    <view class="unit-item">
+      <view class="item-left">血糖单位</view>
+      <view class="item-left">
+        <picker bindchange="bindPickerChange3" value="{{index}}" range="{{array3}}">
+          <view class="picker">
+            {{unitBloodSugar}}
+          </view>
+        </picker>
+      </view>
+    </view>
+    <view class="unit-item">
+      <view class="item-left">尿酸单位</view>
+      <view class="item-left">
+        <picker bindchange="bindPickerChange4" value="{{index}}" range="{{array4}}">
+          <view class="picker">
+            {{unitUricAcid}}
+          </view>
+        </picker>
+      </view>
+    </view>
+    <view class="unit-item">
+      <view class="item-left">血脂单位</view>
+      <view class="item-left">
+        <picker bindchange="bindPickerChange5" value="{{index}}" range="{{array5}}">
+          <view class="picker">
+            {{unitBloodLipid}}
+          </view>
+        </picker>
+      </view>
+    </view>
+  </view>
+
+  <button style="margin-top: 50rpx;" catch:tap="settingData">更改</button>
+  <button style="margin-top: 50rpx;" catch:tap="unitReadData">读取单位</button>
+</view>

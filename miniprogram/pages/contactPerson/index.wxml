@@ -1,0 +1,51 @@
+<view>
+  <view class="box-btn">
+    <button catch:tap="ReadContactPersonDataManager">读取联系人</button>
+  </view>
+  <view style="margin: 50rpx 30rpx;">
+    <view class="ItemInput">
+      <view>联系人姓名：</view>
+      <view><input style="background-color: aliceblue; padding: 15rpx;" bindinput="getName" type="text" placeholder="姓名" /></view>
+    </view>
+    <view class="ItemInput">
+      <view>电话号码：</view>
+      <view><input style="background-color: aliceblue; padding: 15rpx;" bindinput="getPhone" type="text" placeholder="手机号码" /></view>
+    </view>
+    <view class="ItemInput">
+      <view>是否设置为紧急联系人：</view>
+      <switch checked="{{sos}}" bindchange="getSOS" />
+    </view>
+  </view>
+  <view class="box-btn">
+    <button catch:tap="SettingContactPersonDataManager">设置联系人</button>
+  </view>
+  <view style="margin: 50rpx 20rpx;">
+    <view class="ItemInput">
+      <view>删除联系人ID：</view>
+      <view><input style="background-color: aliceblue; padding: 15rpx;" bindinput="deleteId" type="text" placeholder="联系人id" /></view>
+    </view>
+  </view>
+  <view class="box-btn">
+    <button catch:tap="deleteContactPersonDataManager">删除联系人</button>
+  </view>
+  <view style="margin: 50rpx 20rpx;">
+    <view class="ItemInput">
+      <view>需要调整的id：</view>
+      <view><input style="background-color: aliceblue; padding: 15rpx;" bindinput="getFromId" type="text" placeholder="调整id" /></view>
+    </view>
+    <view class="ItemInput">
+      <view>目标id:</view>
+      <view><input style="background-color: aliceblue; padding: 15rpx;" bindinput="getToId" type="text" placeholder="目标id" /></view>
+    </view>
+  </view>
+  <view class="box-btn">
+    <button catch:tap="AdjustContactPersonDataManager">调整联系人</button>
+  </view>
+
+  <view class="box-info">
+    <view class="info-item" wx:for="{{readList}}" wx:key="index">
+      <view>手机号：{{item.phone}}</view> <text>id: {{item.id}}</text>
+      <view>姓名：{{item.name}}</view>
+    </view>
+  </view>
+</view>

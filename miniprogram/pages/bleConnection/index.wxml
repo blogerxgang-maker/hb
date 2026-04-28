@@ -1,0 +1,16 @@
+<view>
+  <!-- <button catch:tap="connectBle2">重新连接</button> -->
+  <view wx:for="{{bleList}}" wx:key="index" class="device-ios" catch:tap="connectBle" data-name="{{item.name}}" data-deviceid="{{item.deviceId}}">
+    <view class="device-ios-item">
+      <view class="deviceNane">名称：{{item.name}}</view>
+      <view class="deviceRssi">RSSI：{{item.RSSI}}</view>
+    </view>
+
+    <view class="deviceMac" style="font-size: 12px;">MAC：{{item.mac}}</view>
+  </view>
+  <!-- <view wx:if="{{!isIOS}}" wx:for="{{bleList}}" wx:key="index" class="device" catch:tap="connectBle" data-name="{{item.name}}" data-deviceid="{{item.deviceId}}">
+    <view class="deviceNane" style="font-size: 16px;">名称：{{item.name}}</view>
+    <view class="deviceMac" style="font-size:12px">MAC：{{item.deviceId}}</view>
+    <view class="deviceMac" style="font-size:12px">RSSI：{{item.RSSI}}</view>
+  </view> -->
+</view>

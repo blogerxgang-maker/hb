@@ -1,0 +1,244 @@
+<!--pages/settings/index.wxml-->
+<view class="container">
+  <!-- 连接状态卡片 -->
+  <view class="card status-card">
+    <view class="status-indicator {{isConnected ? 'connected' : 'disconnected'}}"></view>
+    <text class="status-text">{{isConnected ? '设备已连接' : '设备未连接'}}</text>
+  </view>
+
+  <!-- 直接开关卡片 -->
+  <text class="section-title">快捷开关</text>
+  <view class="card">
+    <!-- 抬腕亮屏 -->
+    <view class="switch-item {{!isConnected ? 'disabled' : ''}}">
+      <view class="switch-info">
+        <text class="switch-title">抬腕亮屏</text>
+        <text class="switch-status {{raiseWristStatus}}">
+          {{raiseWristText}}
+        </text>
+      </view>
+      <switch 
+        checked="{{raiseWrist}}" 
+        bindchange="onRaiseWristChange"
+        color="#2F3133"
+        disabled="{{!isConnected}}"
+      />
+    </view>
+    
+    <view 
+      class="entry-item {{!isConnected ? 'disabled' : ''}}"
+      bindtap="onRaiseWristTimeClick"
+    >
+      <text class="entry-title">抬腕亮屏时段</text>
+      <view style="display: flex; align-items: center;">
+        <text class="entry-value">{{raiseWristStartTime}}-{{raiseWristEndTime}} / {{raiseWristLevel}}档</text>
+        <text class="entry-arrow">▶</text>
+      </view>
+    </view>
+
+    <!-- 常灭屏 -->
+    <view class="switch-item {{!isConnected ? 'disabled' : ''}}">
+      <view class="switch-info">
+        <text class="switch-title">常灭屏</text>
+        <text class="switch-status {{alwaysOffStatus}}">
+          {{alwaysOffText}}
+        </text>
+      </view>
+      <switch 
+        checked="{{alwaysOff}}" 
+        bindchange="onAlwaysOffChange"
+        color="#2F3133"
+        disabled="{{!isConnected}}"
+      />
+    </view>
+  </view>
+
+  <!-- 入口功能卡片 -->
+  <text class="section-title">设备设置</text>
+  <view class="card">
+    <!-- 息屏时间 -->
+    <view 
+      class="entry-item {{!isConnected ? 'disabled' : ''}}"
+      bindtap="onScreenTimeClick"
+    >
+      <text class="entry-title">息屏时间</text>
+      <view style="display: flex; align-items: center;">
+        <text class="entry-value">{{screenTime}}秒</text>
+        <text class="entry-arrow">▶</text>
+      </view>
+    </view>
+    
+    <!-- 健康设置 -->
+    <view 
+      class="entry-item {{!isConnected ? 'disabled' : ''}}"
+      bindtap="onHealthSettingsClick"
+    >
+      <text class="entry-title">健康设置</text>
+      <text class="entry-arrow">▶</text>
+    </view>
+    
+    <!-- 寻找设备 -->
+    <view 
+      class="entry-item {{!isConnected ? 'disabled' : ''}}"
+      bindtap="onFindDeviceClick"
+    >
+      <text class="entry-title">寻找设备</text>
+      <text class="entry-arrow">▶</text>
+    </view>
+    
+    <!-- 事件提醒 -->
+    <view 
+      class="entry-item {{!isConnected ? 'disabled' : ''}}"
+      bindtap="onEventReminderClick"
+    >
+      <text class="entry-title">事件提醒</text>
+      <text class="entry-arrow">▶</text>
+    </view>
+    
+    <!-- 闹钟设置 -->
+    <view 
+      class="entry-item {{!isConnected ? 'disabled' : ''}}"
+      bindtap="onAlarmClick"
+    >
+      <text class="entry-title">闹钟设置</text>
+      <text class="entry-arrow">▶</text>
+    </view>
+    
+    <!-- 常用提醒 -->
+    <view 
+      class="entry-item {{!isConnected ? 'disabled' : ''}}"
+      bindtap="onCommonReminderClick"
+    >
+      <text class="entry-title">常用提醒</text>
+      <text class="entry-arrow">▶</text>
+    </view>
+    
+    <!-- 表盘设置 -->
+    <view 
+      class="entry-item {{!isConnected ? 'disabled' : ''}}"
+      bindtap="onDialClick"
+    >
+      <text class="entry-title">表盘设置</text>
+      <view style="display: flex; align-items: center;">
+        <text class="entry-value">表盘 {{currentDial}}</text>
+        <text class="entry-arrow">▶</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 危险操作卡片 -->
+  <text class="section-title">高级操作</text>
+  <view class="card">
+    <!-- 恢复出厂设置 -->
+    <view 
+      class="entry-item {{!isConnected ? 'disabled' : ''}}"
+      bindtap="onFactoryResetClick"
+    >
+      <text class="entry-title" style="color: #C62828;">恢复出厂设置</text>
+      <text class="entry-arrow">▶</text>
+    </view>
+    
+    <!-- 复位 -->
+    <view 
+      class="entry-item {{!isConnected ? 'disabled' : ''}}"
+      bindtap="onResetClick"
+    >
+      <text class="entry-title" style="color: #C62828;">复位</text>
+      <text class="entry-arrow">▶</text>
+    </view>
+  </view>
+
+  <!-- 表盘选择弹窗 -->
+  <view wx:if="{{showDialModal}}" class="modal-mask" bindtap="closeDialModal">
+    <view class="modal-content" catchtap="preventClose">
+      <view class="modal-header">
+        <text class="modal-title">选择表盘</text>
+      </view>
+      <view class="modal-body">
+        <view 
+          wx:for="{{dialOptions}}" 
+          wx:key="*this"
+          class="modal-option {{selectedDial === item ? 'selected' : ''}}"
+          bindtap="onDialSelect"
+          data-dial="{{item}}"
+        >
+          <text class="modal-option-text">表盘 {{item}}</text>
+          <text wx:if="{{selectedDial === item}}" class="modal-option-check">✓</text>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="modal-btn modal-btn-cancel" bindtap="closeDialModal">取消</button>
+        <button class="modal-btn modal-btn-confirm" bindtap="confirmDial">确定</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 抬腕亮屏时段弹窗 -->
+  <view wx:if="{{showRaiseWristModal}}" class="modal-mask" bindtap="closeRaiseWristModal">
+    <view class="modal-content" catchtap="preventClose">
+      <view class="modal-header">
+        <text class="modal-title">抬腕亮屏设置</text>
+      </view>
+      <view class="modal-body">
+        <view class="entry-item">
+          <text class="entry-title">开始时间</text>
+          <picker mode="time" value="{{selectedRaiseWristStartTime}}" bindchange="onRaiseWristStartChange">
+            <view style="display: flex; align-items: center;">
+              <text class="entry-value">{{selectedRaiseWristStartTime}}</text>
+              <text class="entry-arrow">▶</text>
+            </view>
+          </picker>
+        </view>
+        <view class="entry-item">
+          <text class="entry-title">结束时间</text>
+          <picker mode="time" value="{{selectedRaiseWristEndTime}}" bindchange="onRaiseWristEndChange">
+            <view style="display: flex; align-items: center;">
+              <text class="entry-value">{{selectedRaiseWristEndTime}}</text>
+              <text class="entry-arrow">▶</text>
+            </view>
+          </picker>
+        </view>
+        <text class="section-title">亮度等级</text>
+        <view 
+          wx:for="{{raiseWristLevelOptions}}" 
+          wx:key="*this"
+          class="modal-option {{selectedRaiseWristLevel === item ? 'selected' : ''}}"
+          bindtap="onRaiseWristLevelSelect"
+          data-level="{{item}}"
+        >
+          <text class="modal-option-text">{{item}}档</text>
+          <text wx:if="{{selectedRaiseWristLevel === item}}" class="modal-option-check">✓</text>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="modal-btn modal-btn-cancel" bindtap="closeRaiseWristModal">取消</button>
+        <button class="modal-btn modal-btn-confirm" bindtap="confirmRaiseWristTime">确定</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 息屏时间弹窗 -->
+  <view wx:if="{{showScreenTimeModal}}" class="modal-mask" bindtap="closeScreenTimeModal">
+    <view class="modal-content" catchtap="preventClose">
+      <view class="modal-header">
+        <text class="modal-title">设置息屏时间</text>
+      </view>
+      <view class="modal-body">
+        <view 
+          wx:for="{{screenTimeOptions}}" 
+          wx:key="*this"
+          class="modal-option {{selectedScreenTime === item ? 'selected' : ''}}"
+          bindtap="onScreenTimeSelect"
+          data-time="{{item}}"
+        >
+          <text class="modal-option-text">{{item}}秒</text>
+          <text wx:if="{{selectedScreenTime === item}}" class="modal-option-check">✓</text>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="modal-btn modal-btn-cancel" bindtap="closeScreenTimeModal">取消</button>
+        <button class="modal-btn modal-btn-confirm" bindtap="confirmScreenTime">确定</button>
+      </view>
+    </view>
+  </view>
+</view>

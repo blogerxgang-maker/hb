@@ -1,0 +1,29 @@
+<view class="box">
+  <view class="startTime">
+    <view class="section">
+      <view class="section__title">开始时间：</view>
+      <picker mode="time" value="{{startTime}}" start="00:00" end="23:59" bindchange="bindStartTimeChange">
+        <view class="picker">
+          {{startTime}}
+        </view>
+      </picker>
+    </view>
+    <view class="section">
+      <view class="section__title">结束时间：</view>
+      <picker mode="time" value="{{endTime}}" start="00:00" end="23:59" bindchange="bindStopTimeChange">
+        <view class="picker">
+          {{endTime}}
+        </view>
+      </picker>
+    </view>
+    <view class="section">
+      <view class="section__title">时间间隔：</view>
+      <view style="height: 60rpx; margin-top: 25rpx; background-color: aliceblue;"><input bindinput="changeIntervalTime" value="{{intervalTime}}" type="text" placeholder="30-240分钟" /></view>
+    </view>
+    
+    <view style="margin-top: 50rpx;"><button catch:tap="startTest">开始久坐</button></view>
+    <view style="margin-top: 50rpx;"><button catch:tap="stopTest">关闭久坐</button></view>
+    <view style="margin-top: 50rpx;"><button catch:tap="readTest">读取久坐</button></view>
+  </view>
+
+</view>

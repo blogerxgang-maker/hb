@@ -1,0 +1,26 @@
+<!--pages/function_test/dial_operate/dial_add_dial/index.wxml-->
+<text class="tip-step">
+    使用步骤
+    1.读取表盘文件(在聊天信息中读取文件)
+    2.开始传输(传输过程中保持在该页面)
+</text>
+<view style="height: 100rpx;"></view>
+<view class="file-info">文件名：
+    <view style="color: blue;">{{fileData.fileName}}</view>
+    <!-- <input class="weui-input" bindinput="inputFileNmae" value="{{fileName}}" placeholder="输入文件名" /> -->
+</view>
+<!-- <view class="file-info">文件读取状态:
+    <view wx:if="{{fileStatus==0}}" style="color: brown;">未读取</view>
+    <view wx:elif="{{fileStatus==1}}" style="color: chartreuse;">读取中</view>
+    <view wx:elif="{{fileStatus==2}}" style="color: blue;">已读取</view>
+</view> -->
+<view class="file-info">文件信息:
+    <view style="color: blue;">{{fileData.fileInfo}}</view>
+</view>
+<view style="height: 100rpx;"></view>
+<view class="blue-btn" catchtap="clickReadDialFile">读取表盘文件</view>
+
+<view style="height: 100rpx;"></view>
+<view wx:if="{{!isTransfering}}" class="blue-btn" catchtap="clickStartTransferDialFile">开始传输</view>
+<view wx:else class="blue-btn" catchtap="clickCancelTransferDialFile">取消传输</view>
+<view>{{transferProgressText}}</view>

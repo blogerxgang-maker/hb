@@ -1,0 +1,6 @@
+<view class="box">
+  <view class="item">体温：{{deviceInfo.content. bodyTemperature }}</view>
+  <view class="item">体表温度：{{deviceInfo.content.bodySurfaceTemperature}}</view>
+  <view class="item">测试进度：<text wx:if="{{deviceInfo.progress}}">{{deviceInfo.progress}}%</text> </view>
+  <button class="btn" disabled="{{isTest}}" catch:tap="TemperatureMeasurementSwitchManager">开始测试</button>
+</view>

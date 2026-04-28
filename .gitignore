@@ -1,0 +1,17 @@
+# Dependency directories
+node_modules/
+miniprogram_npm/
+
+# WeChat DevTools private config
+project.private.config.json
+
+# OS files
+.DS_Store
+
+# IDE files
+.idea/
+.vscode/
+
+# Build files
+dist/
+unpackage/

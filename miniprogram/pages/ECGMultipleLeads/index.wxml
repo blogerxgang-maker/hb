@@ -1,0 +1,4 @@
+<view>
+  <view style="margin: 20rpx 0;"><button catch:tap="MultipleLeadsStart">开启ECG多导</button></view>
+  <view style="margin: 20rpx 0;"><button catch:tap="MultipleLeadsStop">关闭ECG多导</button></view>
+</view>

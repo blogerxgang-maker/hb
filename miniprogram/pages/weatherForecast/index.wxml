@@ -1,0 +1,14 @@
+<view>
+
+  <button style="margin-top: 40rpx;" catch:tap="readData">读取天气基本信息</button>
+  <button style="margin-top: 40rpx;" catch:tap="settingData">设置天气基本信息</button>
+  <button style="margin-top: 40rpx;" catch:tap="SendWeatherForecastDataManager">设置天气信息</button>
+  <view class="box">
+    <view> 天气开关：
+      <switch checked="{{weatherSwitch}}" bindchange="weather" />
+    </view>
+    <view> 摄氏度/华氏度：
+      <switch checked="{{unitSwitch}}" bindchange="unit" /> false 摄氏度 true 华氏度
+    </view>
+  </view>
+</view>

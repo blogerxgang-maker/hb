@@ -1,0 +1,78 @@
+<view class="box">
+  <view class="box-container" style="margin-top: 100rpx;">
+    <view class="container-item">
+      <view>经期天数：</view>
+      <view><input type="text" class="inputValue" bindinput="inputValue1" placeholder="经期长度" /></view>
+    </view>
+    <view class="container-item">
+      <view>间隔长度：</view>
+      <view><input type="text" class="inputValue" bindinput="inputValue2" placeholder="经期间隔" /></view>
+    </view>
+    <view class="section">
+      <picker mode="date" value="{{date}}" bindchange="bindDateChange">
+        <view class="picker">
+          最近一次月经时间: {{date}}
+        </view>
+      </picker>
+    </view>
+    <button catch:tap="sendData">只记经期</button>
+  </view>
+  <view class="box-container" style="margin-top: 100rpx;">
+    <view class="container-item">
+      <view>经期天数：</view>
+      <view><input type="text" class="inputValue" bindinput="inputValue1" placeholder="经期长度" /></view>
+    </view>
+    <view class="container-item">
+      <view>间隔长度：</view>
+      <view><input type="text" class="inputValue" bindinput="inputValue2" placeholder="经期间隔" /></view>
+    </view>
+    <view class="section">
+      <picker mode="date" value="{{date}}" bindchange="bindDateChange">
+        <view class="picker">
+          最近一次月经时间: {{date}}
+        </view>
+      </picker>
+    </view>
+    <button catch:tap="sendData2">备孕期</button>
+  </view>
+  <view class="box-container" style="margin-top: 100rpx;">
+    <view class="section">
+      <picker mode="date" value="{{YCdate}}" bindchange="bindYCDateChange">
+        <view class="picker">
+          预产期: {{YCdate}}
+        </view>
+      </picker>
+    </view>
+    <button catch:tap="sendYCData">怀孕期</button>
+  </view>
+  <view class="box-container" style="margin-top: 100rpx;">
+    <view class="container-item">
+      <view>经期天数：</view>
+      <view><input type="text" class="inputValue" bindinput="inputValue1" placeholder="经期长度" /></view>
+    </view>
+    <view class="container-item">
+      <view>间隔长度：</view>
+      <view><input type="text" class="inputValue" bindinput="inputValue2" placeholder="经期间隔" /></view>
+    </view>
+    <view class="section">
+      <picker mode="date" value="{{date}}" bindchange="bindDateChange">
+        <view class="picker">
+          最近一次月经时间: {{date}}
+        </view>
+      </picker>
+    </view>
+    <view class="section">
+      <picker mode="date" value="{{BabyDate}}" bindchange="bindBabyDateChange">
+        <view class="picker">
+          宝宝出生日期: {{BabyDate}}
+        </view>
+      </picker>
+    </view>
+    <view class="container-item">
+      <view>宝宝性别：</view>
+      <view><input type="text" class="inputValue" bindinput="inputValue3" placeholder="1 男  2 女" /></view>
+    </view>
+    <button bind:tap="sendBMData">宝妈期</button>
+    <button bind:tap="readData" style="margin-top: 50rpx;">读取女性经期</button>
+  </view>
+</view>

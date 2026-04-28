@@ -1,0 +1,72 @@
+<view class="container">
+  <!-- 顶部状态栏 -->
+  <view class="status-bar">
+    <view class="mac-info">MAC: {{connectedMac || '未连接'}}</view>
+    <view class="sync-status">{{syncStatus}}</view>
+  </view>
+
+  <!-- 闹钟列表 -->
+  <view class="alarm-list" wx:if="{{alarmList.length > 0}}">
+    <view class="alarm-item" wx:for="{{alarmList}}" wx:key="alarmId" catch:tap="onEditAlarm" data-item="{{item}}">
+      <view class="item-left">
+        <view class="time">{{item.time}}</view>
+        <view class="content">{{item.name || '闹钟标签'}}</view>
+        <view class="repeat">{{item.repeatDesc}}</view>
+      </view>
+      <view class="item-right">
+        <switch checked="{{item.alarmSwitch}}" catch:tap="onToggleAlarm" data-id="{{item.alarmId}}" data-item="{{item}}" color="#007aff" />
+        <view class="delete-btn" catch:tap="onDeleteAlarm" data-id="{{item.alarmId}}" data-item="{{item}}">
+          <image class="icon-delete" src="/image/alarm/delete.png" />
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:else>
+    <image class="empty-img" src="/image/alarm/empty_alarm.png" />
+    <view class="empty-text">还没有闹钟，点击右下角 + 添加</view>
+  </view>
+
+  <!-- 悬浮按钮 -->
+  <view class="fab" catch:tap="onAddAlarm">+</view>
+
+  <!-- 添加/编辑弹窗 -->
+  <view class="modal-mask" wx:if="{{showModal}}" catch:touchmove="preventTouchMove">
+    <view class="modal-content">
+      <view class="modal-title">{{isEdit ? '编辑闹钟' : '添加闹钟'}}</view>
+      
+      <view class="form-item">
+        <text class="label">提醒时间</text>
+        <picker mode="time" value="{{editingAlarm.time}}" bindchange="onTimeChange">
+          <view class="time-picker">{{editingAlarm.time}}</view>
+        </picker>
+      </view>
+
+      <view class="form-item">
+        <text class="label">闹钟标签</text>
+        <input class="input-box" value="{{editingAlarm.name}}" placeholder="填写闹钟标签" maxlength="12" bindinput="onNameInput" />
+      </view>
+
+      <view class="form-item">
+        <text class="label">重复设置</text>
+        <view class="repeat-grid">
+          <view 
+            wx:for="{{weekDays}}" 
+            wx:key="key" 
+            class="repeat-chip {{editingAlarm.alarmRepeat[item.key] ? 'active' : ''}}"
+            catch:tap="onToggleRepeat"
+            data-key="{{item.key}}"
+          >
+            {{item.label}}
+          </view>
+        </view>
+      </view>
+
+      <view class="modal-btns">
+        <button class="btn-cancel" catch:tap="onCloseModal">取消</button>
+        <button class="btn-confirm" catch:tap="onConfirmSave">确定</button>
+      </view>
+    </view>
+  </view>
+</view>

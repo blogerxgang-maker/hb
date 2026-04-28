@@ -1,0 +1,15 @@
+<view class="box">
+  <view class="box-day">
+    <view class="day-item" catch:tap="readData" data-index="0">今天</view>
+    <view class="day-item" catch:tap="readData" data-index="1">昨天</view>
+    <view class="day-item" catch:tap="readData" data-index="2">前天</view>
+  </view>
+  <view class="box-data">
+    <view>读取进度：{{device.Progress}}</view>
+    <view>
+      <view class="data-item" wx:for="{{device.content}}" wx:key="index">
+        <text>时间：{{item.date}}</text>
+      </view>
+    </view>
+  </view>
+</view>

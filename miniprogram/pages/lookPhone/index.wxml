@@ -1,0 +1,4 @@
+<view class="box">
+  <view style="margin-bottom: 30rpx;"><button catch:tap="startBraceletSearch">手机开始查找手环</button></view>
+  <view style="margin-bottom: 30rpx;"><button catch:tap="stopBraceletSearch">手机退出查找手环</button></view>
+</view>

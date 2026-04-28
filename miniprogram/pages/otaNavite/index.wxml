@@ -1,0 +1,23 @@
+<!--pages/function_test/ota/index.wxml-->
+<view><button catch:tap="setJLVerify">进行杰里认证</button></view>
+<text class="tip-step">
+    使用步骤
+    1.读取升级文件(在微信聊天信息中读取文件)
+    2.开始升级(升级过程中保持在该页面)
+</text>
+<view style="height: 100rpx;"></view>
+<view class="file-info">文件读取状态:
+    <view wx:if="{{fileStatus==0}}" style="color: brown;">未读取</view>
+    <view wx:elif="{{fileStatus==1}}" style="color: chartreuse;">读取中</view>
+    <view wx:elif="{{fileStatus==2}}" style="color: blue;">已读取</view>
+</view>
+<view class="file-info">文件信息:{{fileName}}
+    <view style="color: blue;">{{fileInfo}}</view>
+</view>
+<view style="height: 100rpx;"></view>
+<view class="blue-btn" catchtap="clickReadFile">读取升级文件</view>
+
+<view style="height: 100rpx;"></view>
+<view wx:if="{{!isOTAing}}" class="blue-btn" catchtap="clickStartOTA">开始升级</view>
+<view wx:else class="blue-btn" catchtap="clickCancelOTA">取消传输</view>
+<view>{{otaProgressText}}</view>

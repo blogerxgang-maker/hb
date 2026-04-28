@@ -1,0 +1,20 @@
+<scroll-view class="myScoll" scroll-x>
+  <view>
+    <view class="box1">
+      <canvas canvas-id="ecg" style="width: 5000px; height: 300px;"></canvas>
+    </view>
+    <view class="box2">
+      <canvas canvas-id="myCanvas" style="width: 5000px; height: 300px;"></canvas>
+
+    </view>
+  </view>
+</scroll-view>
+
+<view style="margin-top: 50rpx;">
+  <view style="margin-bottom: 30rpx;">ECG数据ID：{{dataId}}</view>
+<!-- <view>注意：只做了部分解析，现在ECG不完整</view> -->
+<button catch:tap="ReadTestSeavDataIdDataManager" style="margin-top: 40rpx; margin-bottom: 30rpx;">获取ECG数据ID</button>
+<button catch:tap="ReadIdTestSeavDataManager">根据ID获取数据</button>
+
+<view>注意：这里的波形只做展示，不作为实际波形数据绘制</view>
+</view>

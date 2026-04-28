@@ -1,0 +1,7 @@
+<view class="box">
+  <view class="box-item"> 
+  <view >时间: <input style="display: inline-block; background-color: aliceblue;" bindinput="inputValue" type="number" placeholder="3-60秒"/></view>
+  <button style="margin-top: 50rpx; margin-bottom: 30rpx;" catch:tap="LightUpTimeData">设置屏幕时间</button>
+  <button style="margin-top: 50rpx; margin-bottom: 30rpx;" catch:tap="readLightUpTimeData">读取屏幕时间</button>
+  </view>
+</view>

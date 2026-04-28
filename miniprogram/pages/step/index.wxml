@@ -1,0 +1,25 @@
+<view class="box">
+  <view class="box-day">
+    <!-- <text class="day-left" catch:tap="reductionOf">上一天</text>
+    <text class="time">2024-05-15</text>
+    <text class="day-left" catch:tap="addDay">下一天</text> -->
+    <view class="day-item" catch:tap="readData" data-index="0" >今天</view>
+    <view class="day-item" catch:tap="readData" data-index="1" >昨天</view>
+    <view class="day-item" catch:tap="readData" data-index="2" >前天</view>
+  </view>
+
+  <view class="box-content">
+    <view class="content-item">
+      <text>步数：</text>
+      <text>{{device.step}} 步</text>
+    </view>
+    <view class="content-item">
+      <text>距离：</text>
+      <text>{{device.distance}} m</text>
+    </view>
+    <view class="content-item">
+      <text>卡路里：</text>
+      <text>{{device.calorie}} Kcal</text>
+    </view>
+  </view>
+</view>

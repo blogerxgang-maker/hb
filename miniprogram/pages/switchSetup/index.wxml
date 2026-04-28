@@ -1,0 +1,34 @@
+<view class="box">
+
+  <view class="box-item">
+    <view>心率自动检测</view>
+    <view>
+      <switch checked="{{checkStatus1}}" bindchange="clickValue1" />
+    </view>
+  </view>
+  <view class="box-item">
+    <view>血压自动检测</view>
+    <view>
+      <switch checked="{{checkStatus2}}" bindchange="clickValue2" />
+    </view>
+  </view>
+  <view class="box-item">
+    <view>科学睡眠</view>
+    <view>
+      <switch checked="{{checkStatus3}}" bindchange="clickValue3" />
+    </view>
+  </view>
+  <view class="box-item">
+    <view>体温自动检测</view>
+    <view>
+      <switch checked="{{checkStatus4}}" bindchange="clickValue4" />
+    </view>
+  </view>
+  <view class="box-item">
+    <view>血糖自动检测</view>
+    <view>
+      <switch checked="{{checkStatus5}}" bindchange="clickValue5" />
+    </view>
+  </view>
+  <!-- 以下三个项目已隐藏：血液自动检测、跌倒提醒、缺氧提醒 -->
+</view>

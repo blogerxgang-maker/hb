@@ -1,0 +1,33 @@
+<view>
+  <view class="box-input">
+    <form bindsubmit="onSubmit">
+      <view class="input">
+        <text>身高：</text>
+        <input type="number" name="height" placeholder="请输入身高！" />cm
+      </view>
+      <view class="input">
+        <text>体重：</text>
+        <input type="number" name="weight" placeholder="请输入体重！" />kg
+      </view>
+      <view class="input">
+        <text>年龄：</text>
+        <input type="number" name="age" placeholder="请输入年龄！" />
+      </view>
+      <view class="input">
+        <text>性别：</text>
+        <input type="number" name="sex" placeholder="0 女  1 男" />
+      </view>
+      <view class="input">
+        <text>目标步数：</text>
+        <input type="number" name="steps" placeholder="如4000步" />
+      </view>
+      <view class="input">
+        <text>目标睡眠：</text>
+        <input type="number" name="sleep" placeholder="如60分钟" />
+      </view>
+      <button form-type="submit">开始同步</button>
+    </form>
+
+  </view>
+  
+</view>

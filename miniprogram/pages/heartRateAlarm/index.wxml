@@ -1,0 +1,10 @@
+<view class="box">
+  <view style="padding: 50rpx;" class="box-item">
+    <view><input style="padding: 10rpx; background-color: aliceblue; margin-bottom: 30rpx;" bindinput="value1" type="text" placeholder="最大心率" /></view>
+    <view><input style="padding: 10rpx; background-color: aliceblue; margin-bottom: 30rpx;" bindinput="value2" type="text" placeholder="最小心率" /></view>
+
+    <button style="margin-bottom: 20rpx;" catch:tap="setHeartRateAlarm">设置心率报警</button>
+    <button style="margin-bottom: 20rpx;" catch:tap="stopHeartRateAlarm">关闭心率报警</button>
+    <button style="margin-bottom: 20rpx;" catch:tap="readHeartRateAlarm">读取心率报警</button>
+  </view>
+</view>

@@ -1,0 +1,10 @@
+<view class="box">
+
+  <view class="box-content">
+    <view>血氧：{{device.content.bloodOxygen}}</view>
+  </view>
+
+  <view class="btn"><button catch:tap="startTest">开启测量</button></view>
+  <view class="btn"><button catch:tap="stopTest">关闭测量</button></view>
+
+</view>

@@ -1,0 +1,5 @@
+<view class="sync-time">
+
+  <button style="margin: 30rpx auto; " catch:tap="bindSyncTime">同步时间</button>
+
+</view>

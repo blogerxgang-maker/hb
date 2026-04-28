@@ -1,0 +1,26 @@
+<!-- 使用scroll-y可以创建纵向滚动的区块 -->
+<scroll-view class="myScoll" scroll-x>
+  <view>
+    <view class="box1">
+      <canvas canvas-id="ecg" style="width: 375px; height: 300px;"></canvas>
+    </view>
+    <view class="box2">
+      <canvas canvas-id="myCanvas" style="width: 175px; height: 300px;"></canvas>
+
+    </view>
+  </view>
+</scroll-view>
+
+<!-- <scroll-view type="list">
+  <view>
+    <view>
+      <view class="box1">
+        <canvas canvas-id="ecg" style="width: 375px; height: 300px;"></canvas>
+      </view>
+      <view class="box2">
+        <canvas canvas-id="myCanvas" style="width: 175px; height: 300px;"></canvas>
+
+      </view>
+    </view>
+  </view>
+</scroll-view> -->

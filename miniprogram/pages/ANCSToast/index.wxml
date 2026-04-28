@@ -1,0 +1,15 @@
+<view class="box">
+  <view class="box-btn">
+    <view class="btn-left" catch:tap="allStart">全部打开</view>
+    <view class="btn-left" catch:tap="allStop">全部关闭</view>
+  </view>
+
+  <view class="content">
+    <view class="content-item" wx:for="{{toastList}}">
+      <view class="item-name">{{item.name}}</view>
+      <view class="item-switch">
+        <switch checked="{{item.status}}" data-name="{{item.name}}" bindchange="{{item.bindTap}}" />
+      </view>
+    </view>
+  </view>
+</view>

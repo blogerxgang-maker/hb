@@ -1,0 +1,19 @@
+<view class="box">
+  <view class="box-day">
+
+    <view class="day-item" catch:tap="readData" data-index="0">今天</view>
+    <view class="day-item" catch:tap="readData" data-index="1">昨天</view>
+    <view class="day-item" catch:tap="readData" data-index="2">前天</view>
+  </view>
+  <view class="box-data">
+    <view>读取进度：{{device.Progress}}</view>
+    <view wx:if="{{device.content}}">
+      <view class="data-item" wx:for="{{device.content.totalData}}">
+        <text>体温：{{item.bodyTemperature}}</text>
+        <text>体表温度：{{item.bodySurfaceTemperature}}</text>
+        <text>时间：{{item.time}}</text>
+      </view>
+    </view>
+
+  </view>
+</view>

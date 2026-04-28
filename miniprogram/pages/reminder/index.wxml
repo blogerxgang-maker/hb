@@ -1,0 +1,130 @@
+<!--pages/reminder/index.wxml-->
+<view class="container">
+  <!-- 未连接提示 -->
+  <view wx:if="{{!isConnected}}" class="card not-connected">
+    <text class="not-connected-icon">🔔</text>
+    <text class="not-connected-text">未连接设备</text>
+    <text class="not-connected-hint">请先在"连接"页面连接设备</text>
+  </view>
+
+  <block wx:else>
+
+    <!-- 时间卡片 -->
+    <view class="card time-card">
+      <text class="card-title">提醒时间</text>
+      
+      <view class="time-row">
+        <text class="time-label">开始时间</text>
+        <picker mode="time" value="{{startTime}}" bindchange="onStartTimeChange">
+          <view class="time-picker">
+            <text class="time-value">{{startTime}}</text>
+            <text class="time-arrow">▶</text>
+          </view>
+        </picker>
+      </view>
+      
+      <view class="time-row">
+        <text class="time-label">结束时间</text>
+        <picker mode="time" value="{{endTime}}" bindchange="onEndTimeChange">
+          <view class="time-picker">
+            <text class="time-value">{{endTime}}</text>
+            <text class="time-arrow">▶</text>
+          </view>
+        </picker>
+      </view>
+      
+      <view wx:if="{{timeError}}" class="time-error">
+        <text class="time-error-icon">⚠️</text>
+        <text>时间范围有误，请调整</text>
+      </view>
+    </view>
+
+    <!-- 震动模式卡片 -->
+    <view class="card mode-card">
+      <text class="card-title">震动模式</text>
+      
+      <view class="mode-grid">
+        <view 
+          wx:for="{{modeList}}" 
+          wx:key="id"
+          class="mode-btn {{selectedMode === item.id ? 'selected' : ''}}"
+          bindtap="onModeSelect"
+          data-mode="{{item.id}}"
+        >
+          <view class="mode-dot"></view>
+          <text>{{item.name}}</text>
+        </view>
+      </view>
+      
+      <view class="mode-desc">
+        {{modeDescription}}
+      </view>
+    </view>
+
+    <!-- 间隔卡片 -->
+    <view class="card interval-card">
+      <text class="card-title">提醒间隔</text>
+      
+      <view class="interval-header">
+        <view class="interval-input-wrap" bindtap="onIntervalInputTap">
+          <input 
+            class="interval-input" 
+            type="number" 
+            value="{{intervalTime}}" 
+            bindinput="onIntervalInput"
+            bindblur="onIntervalInputBlur"
+            maxlength="3"
+          />
+          <text class="interval-unit">分钟</text>
+        </view>
+        <text class="interval-range">范围 1-180</text>
+      </view>
+      
+      <slider 
+        class="interval-slider"
+        min="1" 
+        max="180" 
+        step="1"
+        value="{{intervalTime}}"
+        activeColor="#4db6ac"
+        backgroundColor="#E3E5E8"
+        block-size="28"
+        bindchange="onIntervalChange"
+        bindchanging="onIntervalChanging"
+      />
+      
+      <view class="slider-labels">
+        <text class="slider-label">1分钟</text>
+        <text class="slider-label">180分钟</text>
+      </view>
+    </view>
+
+    <!-- 保存条 -->
+    <view class="save-bar">
+      <view class="save-status">
+        <text class="save-status-text {{isConnected ? 'connected' : 'disconnected'}}">
+          {{isConnected ? '设备已连接' : '设备未连接'}}
+        </text>
+      </view>
+      <button 
+        class="save-btn {{isSaving ? 'saving' : ''}} {{!canSave ? 'disabled' : ''}}"
+        bindtap="saveSettings"
+        disabled="{{!canSave || isSaving}}"
+      >
+        <view wx:if="{{isSaving}}" class="loading-spinner"></view>
+        {{isSaving ? '保存中…' : '保存'}}
+      </button>
+    </view>
+
+    <!-- 关闭提醒按钮 -->
+    <view class="close-bar">
+      <button 
+        class="close-btn {{isSaving ? 'disabled' : ''}}"
+        bindtap="closeSelectedReminders"
+        disabled="{{!isConnected || isSaving}}"
+      >
+        关闭提醒
+      </button>
+    </view>
+  </block>
+</view>

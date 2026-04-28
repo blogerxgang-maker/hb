@@ -1,0 +1,30 @@
+<view class="box">
+
+  <view class="box-btn"><button catch:tap="startMovementPatternD5DataManager">开启运动模式</button></view>
+  <view class="box-btn"><button catch:tap="stopMovementPatternD5DataManager">关闭运动模式</button></view>
+  <view class="box-btn"><button catch:tap="readMovementPatternD5DataManager">读取运动模式</button></view>
+  <view style="margin: 50rpx 20rpx;">
+    <view>CRC0:{{crcData.CRC0}}</view>
+    <view>CRC1:{{crcData.CRC1}}</view>
+    <view>CRC2:{{crcData.CRC2}}</view>
+  </view>
+  <view class="box-btn"><button catch:tap="startMovementPatternD3DataManager">读取运动模式校验值</button></view>
+  <view wx:if="{{crcData.CRC0}}" class="box-btn"><button catch:tap="readMovementPatternD34DataManager">读取CRC0模式数据</button></view>
+  <view wx:if="{{crcData.CRC1}}" class="box-btn"><button catch:tap="readMovementPatternD34DataManager2">读取CRC1模式数据</button></view>
+  <view wx:if="{{crcData}}" class="box-btn"><button catch:tap="readMovementPatternD34DataManager3">读取CRC2模式数据</button></view>
+
+  <view style="border-bottom: 1px solid #999;">
+    <view>
+      <text>开始时：</text>
+      <view wx:if="{{exerciseData.startTime}}" >{{exerciseData.startTime.startYear + '-' + exerciseData.startTime.startMonth + '-' + exerciseData.startTime.startDay + '-' + exerciseData.startTime.startHour + '-' + exerciseData.startTime.startMinute}}</view>
+    </view>
+
+    <view>
+      <text>结束时：</text>
+      <view wx:if="{{exerciseData.endTime}}">{{exerciseData.endTime.endYear + '-' + exerciseData.endTime.endMonth + '-' + exerciseData.endTime.endDay + '-' + exerciseData.endTime.endHour + '-' + exerciseData.endTime.endMinute}}</view>
+    </view>
+    <view>CRC：{{exerciseData.movementData.crc}}</view>
+
+  </view>
+
+</view>

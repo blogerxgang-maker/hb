@@ -1,0 +1,22 @@
+<view class="box">
+  <view>
+    <view>手环状态：{{device.content.wristbandStatus}}</view>
+    <view>呼吸率HR1每秒：{{device.content.HR1PerSecond}}</view>
+    <view>呼吸率HR2每分钟：{{device.content.HR2PerHour}}</view>
+    <view>每秒Hrv: {{device.content.Hrv}}</view>
+    <view>RR1每秒：{{device.content.RR1PerSecond}}</view>
+    <view>RR2每6秒：{{device.content.RR2Per6Second}}</view>
+    <view>BR2每分钟：{{device.content.BR2PerHours}}</view>
+    <view>BR1每秒：{{device.content.BR2PerSecond}}</view>
+    <view>导联佩戴：{{device.content.wearStatus}}</view>
+    <view>M_ID：{{device.content.M_ID}}</view>
+    <view>QTC：{{device.content.QTC}}</view>
+    <view>PWV：{{device.content.PWV}}</view>
+  </view>
+  <view>
+
+  </view>
+  <view class="ecg-item">测试进度：{{device && device.progress}}%</view>
+  <button class="btn" catch:tap="ECGmeasureStartDataManager">开启测试</button>
+  <button class="btn" catch:tap="ECGmeasureStopDataManager">关闭测试</button>
+</view>

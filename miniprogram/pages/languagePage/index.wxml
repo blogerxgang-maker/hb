@@ -1,0 +1,7 @@
+<view>
+
+  <view style="display: flex;">语言：<input type="text" style="background-color: aliceblue;padding: 10px;" placeholder="输入语言" bindinput="inputChange" /></view>
+
+  <button style="margin-top: 20px;" catch:tap="bindLanguage">设置</button>
+
+</view>

@@ -1,0 +1,59 @@
+<view class="box">
+
+  <view class="box-item">
+    <view>未知来电：</view>
+    <view><input style="background-color: aliceblue; padding: 10rpx 15rpx;" bindinput="inputValue1" type="text" placeholder="手机号码" value="{{phone1}}" /></view>
+  </view>
+  <view><button catch:tap="startPhone" style="margin-bottom: 40rpx;">未知来电通知</button></view>
+
+  <view class="box-item">
+    <view>联系人电话：</view>
+    <view><input style="background-color: aliceblue; padding: 10rpx 15rpx;" bindinput="inputValue1" type="text" placeholder="手机号码" value="{{phone1}}" /></view>
+  </view>
+  <view class="box-item">
+    <view>联系人：</view>
+    <view><input style="background-color: aliceblue; padding: 10rpx 15rpx;" bindinput="inputValue3" type="text" placeholder="名称" /></view>
+  </view>
+  <view><button catch:tap="storagePhone" style="margin-bottom: 40rpx;">通讯录来电通知</button></view>
+
+  <view class="box-item">
+    <view>联系人电话：</view>
+    <view><input style="background-color: aliceblue; padding: 10rpx 15rpx;" bindinput="inputValue1" type="text" placeholder="手机号码" value="{{phone1}}" /></view>
+  </view>
+  <view class="box-item">
+    <view>发送的消息：</view>
+    <view><input style="background-color: aliceblue; padding: 10rpx 15rpx;" bindinput="inputValue2" type="text" placeholder="消息" /></view>
+  </view>
+  <view><button catch:tap="sendSMS" style="margin-bottom: 40rpx;">未知短信通知</button></view>
+
+
+  <view class="box-item">
+    <view>联系人电话：</view>
+    <view><input style="background-color: aliceblue; padding: 10rpx 15rpx;" bindinput="inputValue1" type="text" placeholder="手机号码" value="{{phone1}}" /></view>
+  </view>
+  <view class="box-item">
+    <view>联系人：</view>
+    <view><input style="background-color: aliceblue; padding: 10rpx 15rpx;" value="{{name}}" bindinput="inputValue3" type="text" placeholder="名称" /></view>
+  </view>
+  <view class="box-item">
+    <view>发送的消息：</view>
+    <view><input style="background-color: aliceblue; padding: 10rpx 15rpx;" bindinput="inputValue2" type="text" placeholder="消息" /></view>
+  </view>
+  <view><button catch:tap="sendSMS2" style="margin-bottom: 40rpx;">通讯录短信通知</button></view>
+
+
+  <view class="box-item">
+    <view></view>
+    <picker bindchange="bindPickerChange" value="{{index - 2}}" range="{{array}}">
+      <view class="picker">
+        应用名称： {{array[index-2]}}
+      </view>
+    </picker>
+  </view>
+  <view class="box-item">
+    <view>发送的消息：</view>
+    <view><input style="background-color: aliceblue; padding: 10rpx 15rpx;" bindinput="inputValue2" type="text" placeholder="消息" /></view>
+  </view>
+  <view><button catch:tap="sendSMS3" style="margin-bottom: 40rpx;">应用通知</button></view>
+</view>
+<!-- 18588402715 -->

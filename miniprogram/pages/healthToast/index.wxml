@@ -1,0 +1,41 @@
+<view class="box">
+  <view class="startTime">
+    <view class="section">
+      <view class="section__title">开始时间：</view>
+      <picker mode="time" value="{{startTime}}" start="00:00" end="23:59" bindchange="bindStartTimeChange">
+        <view class="picker">
+          {{startTime}}
+        </view>
+      </picker>
+    </view>
+    <view class="section">
+      <view class="section__title">结束时间：</view>
+      <picker mode="time" value="{{endTime}}" start="00:00" end="23:59" bindchange="bindStopTimeChange">
+        <view class="picker">
+          {{endTime}}
+        </view>
+      </picker>
+    </view>
+    <view class="section">
+      <view class="section__title">功能类型：</view>
+      <picker bindchange="bindPickerChange" value="{{index}}" range="{{array}}">
+        <view class="picker">
+          {{array[index]}}
+        </view>
+      </picker>
+    </view>
+    <view class="section">
+      <view class="section__title">时间间隔：</view>
+      <view style="height: 60rpx; margin-top: 25rpx; background-color: aliceblue;"><input bindinput="changeIntervalTime" value="{{intervalTime}}" type="text" placeholder="30-240分钟" /></view>
+    </view>
+    <view class="section">
+      <view class="section__title">开关：</view>
+      <switch checked="{{deviceSwitch}}" bindchange="bindSwitchChange" />
+    </view>
+    <text>目前测试手环只有久坐和喝水，其他功能暂不支持</text>
+
+    <view style="margin-top: 50rpx;"><button catch:tap="startTest">设置健康提醒功能</button></view>
+    <view style="margin-top: 50rpx;"><button catch:tap="readTest">读取健康提醒功能</button></view>
+  </view>
+
+</view>
