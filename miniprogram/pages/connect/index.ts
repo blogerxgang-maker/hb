@@ -1,4 +1,9 @@
 // pages/connect/index.ts
+//
+// 注意：避免使用 TS-only 语法（type 别名 / interface / 参数类型注解 / 泛型 / as），
+// 以兼容某些 IDE 真机调试时 Babel 没启用 TS preset 的解析路径。
+// @ts-nocheck
+
 import { getBleManager } from "../../utils/bleManager";
 
 const bm = getBleManager();
@@ -9,31 +14,31 @@ Page({
     connectionStatus: "disconnected",
     statusTitle: "未连接",
     statusSubtitle: "未连接任何设备",
-    bleList: [] as any[],
+    bleList: [],
     isRefreshing: false,
-    connectedDevice: null as any,
+    connectedDevice: null,
   },
 
-  _offConnected: null as null | (() => void),
-  _offDisconnected: null as null | (() => void),
-  _offReconnecting: null as null | (() => void),
+  _offConnected: null,
+  _offDisconnected: null,
+  _offReconnecting: null,
 
-  onLoad() {
+  onLoad: function () {
     this.bindManagerEvents();
     this.refreshFromManager();
   },
 
-  onShow() {
+  onShow: function () {
     this.refreshFromManager();
   },
 
-  onHide() {
+  onHide: function () {
     if (this.data.connectionStatus === "scanning") {
       this.stopScan();
     }
   },
 
-  onUnload() {
+  onUnload: function () {
     if (this.data.connectionStatus === "scanning") {
       this.stopScan();
     }
@@ -42,25 +47,26 @@ Page({
     if (this._offReconnecting) this._offReconnecting();
   },
 
-  /**
-   * 订阅全局蓝牙管理器事件
-   */
-  bindManagerEvents() {
-    this._offConnected = bm.on("connected", (device: any) => {
-      this.setData({
+  // 订阅全局蓝牙管理器事件
+  bindManagerEvents: function () {
+    const self = this;
+    this._offConnected = bm.on("connected", function (device) {
+      self.setData({
         connectionStatus: "connected",
         statusTitle: "已连接",
-        statusSubtitle: `${
-          device.name || device.deviceName || "设备"
-        } [${device.deviceId}]`,
+        statusSubtitle:
+          (device.name || device.deviceName || "设备") +
+          " [" +
+          device.deviceId +
+          "]",
         connectedDevice: device,
       });
       wx.hideLoading();
       wx.showToast({ title: "连接成功", icon: "success" });
     });
 
-    this._offDisconnected = bm.on("disconnected", (info: any) => {
-      this.setData({
+    this._offDisconnected = bm.on("disconnected", function (info) {
+      self.setData({
         connectionStatus: "disconnected",
         statusTitle: "未连接",
         statusSubtitle:
@@ -73,30 +79,30 @@ Page({
       }
     });
 
-    this._offReconnecting = bm.on("reconnecting", (info: any) => {
-      this.setData({
+    this._offReconnecting = bm.on("reconnecting", function (info) {
+      self.setData({
         connectionStatus: "connecting",
         statusTitle: "重连中",
         statusSubtitle:
           info && info.attempt
-            ? `第 ${info.attempt} 次尝试…`
+            ? "第 " + info.attempt + " 次尝试…"
             : "正在尝试自动重连…",
       });
     });
   },
 
-  /**
-   * 根据 bleManager 当前状态刷新 UI
-   */
-  refreshFromManager() {
+  // 根据 bleManager 当前状态刷新 UI
+  refreshFromManager: function () {
     if (bm.isConnected()) {
       const device = bm.getCurrentDevice() || wx.getStorageSync("bleInfo");
       this.setData({
         connectionStatus: "connected",
         statusTitle: "已连接",
-        statusSubtitle: `${
-          (device && (device.name || device.deviceName)) || "设备"
-        } [${device && device.deviceId}]`,
+        statusSubtitle:
+          ((device && (device.name || device.deviceName)) || "设备") +
+          " [" +
+          (device && device.deviceId) +
+          "]",
         connectedDevice: device,
       });
       return;
@@ -119,10 +125,8 @@ Page({
     }
   },
 
-  /**
-   * 蓝牙错误友好提示
-   */
-  getBleErrorMessage(err: any) {
+  // 蓝牙错误友好提示
+  getBleErrorMessage: function (err) {
     const errCode = err && (err.errCode || err.code);
     const errMsg = (err && err.errMsg) || "";
 
@@ -157,11 +161,11 @@ Page({
         ) {
           return "请在手机设置中授予微信蓝牙权限";
         }
-        return `操作失败(${errCode || "未知错误"})，请检查设备状态并重试`;
+        return "操作失败(" + (errCode || "未知错误") + ")，请检查设备状态并重试";
     }
   },
 
-  showErrorTip(err: any) {
+  showErrorTip: function (err) {
     const message = this.getBleErrorMessage(err);
     wx.showModal({
       title: "提示",
@@ -172,10 +176,9 @@ Page({
     });
   },
 
-  /**
-   * 开始扫描
-   */
-  startScan() {
+  // 开始扫描
+  startScan: function () {
+    const self = this;
     this.setData({
       connectionStatus: "scanning",
       statusTitle: "正在扫描",
@@ -183,27 +186,26 @@ Page({
       bleList: [],
     });
 
-    bm.startScan((devices, err) => {
+    bm.startScan(function (devices, err) {
       if (err) {
-        this.setData({
+        self.setData({
           connectionStatus: "disconnected",
           statusTitle: "扫描失败",
-          statusSubtitle: this.getBleErrorMessage(err),
+          statusSubtitle: self.getBleErrorMessage(err),
         });
-        this.showErrorTip(err);
+        self.showErrorTip(err);
         return;
       }
-      this.setData({ bleList: devices });
+      self.setData({ bleList: devices });
     });
   },
 
-  /**
-   * 停止扫描
-   */
-  stopScan() {
-    bm.stopScan(() => {
-      if (this.data.connectionStatus === "scanning") {
-        this.setData({
+  // 停止扫描
+  stopScan: function () {
+    const self = this;
+    bm.stopScan(function () {
+      if (self.data.connectionStatus === "scanning") {
+        self.setData({
           connectionStatus: "disconnected",
           statusTitle: "未连接",
           statusSubtitle: "未连接任何设备",
@@ -212,26 +214,26 @@ Page({
     });
   },
 
-  /**
-   * 下拉刷新：重启扫描
-   */
-  onRefresh() {
+  // 下拉刷新：重启扫描
+  onRefresh: function () {
+    const self = this;
     this.setData({ isRefreshing: true });
-    bm.stopScan(() => {
-      this.setData({ bleList: [] });
-      this.startScan();
-      setTimeout(() => {
-        this.setData({ isRefreshing: false });
+    bm.stopScan(function () {
+      self.setData({ bleList: [] });
+      self.startScan();
+      setTimeout(function () {
+        self.setData({ isRefreshing: false });
       }, 1000);
     });
   },
 
-  /**
-   * 点击设备进行连接
-   */
-  onDeviceClick(e: any) {
+  // 点击设备进行连接
+  onDeviceClick: function (e) {
+    const self = this;
     const deviceId = e.currentTarget.dataset.deviceid;
-    let device = this.data.bleList.find((d) => d.deviceId === deviceId);
+    let device = this.data.bleList.find(function (d) {
+      return d.deviceId === deviceId;
+    });
 
     if (!device) {
       const bleInfo = wx.getStorageSync("bleInfo");
@@ -248,36 +250,34 @@ Page({
     this.setData({
       connectionStatus: "connecting",
       statusTitle: "连接中",
-      statusSubtitle: `正在连接 ${
-        device.name || device.deviceName || "设备"
-      }…`,
+      statusSubtitle:
+        "正在连接 " + (device.name || device.deviceName || "设备") + "…",
     });
 
-    bm.connect(device, (ok, err) => {
+    bm.connect(device, function (ok, err) {
       // connect 成功的 UI 更新由 connected 事件统一处理
       if (!ok) {
         wx.hideLoading();
-        this.setData({
+        self.setData({
           connectionStatus: "disconnected",
           statusTitle: "连接失败",
-          statusSubtitle: this.getBleErrorMessage(err || {}),
+          statusSubtitle: self.getBleErrorMessage(err || {}),
         });
-        this.showErrorTip(err || { errMsg: "连接失败" });
+        self.showErrorTip(err || { errMsg: "连接失败" });
       }
     });
   },
 
-  /**
-   * 主动断开
-   */
-  disconnect() {
+  // 主动断开
+  disconnect: function () {
+    const self = this;
     wx.showModal({
       title: "提示",
       content: "确定要断开设备连接吗？",
-      success: (res) => {
+      success: function (res) {
         if (res.confirm) {
           bm.disconnect();
-          this.setData({ bleList: [] });
+          self.setData({ bleList: [] });
           wx.showToast({ title: "已断开连接", icon: "success" });
         }
       },
