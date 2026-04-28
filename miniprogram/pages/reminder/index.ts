@@ -1,550 +1,528 @@
 // pages/reminder/index.ts
-import { veepooBle, veepooFeature } from '../../miniprogram_dist/index'
+//
+// 提醒下发 + 常灭屏 设置页（核心页之一）。
+//
+// 状态同步：所有 UI 状态都以 bleManager 的事件回调为准；连接成功后会通过
+// syncDeviceStateAfterConnect 触发一次设备读取。
+//
+// 下发流程：基于 ReminderQueue 的指令队列，先 diff 再下发，支持 ack 等待 + 重试。
 
-// 震动模式定义
-const MODE_LIST = [
-  { id: 'single_soft', name: '单次柔和', desc: '单次柔和：下发【读书提醒】', type: '看书' },
-  { id: 'single_strong', name: '单次强度', desc: '单次强度：下发【吃药提醒】', type: '吃药' },
-  { id: 'double_soft', name: '双次柔和', desc: '双次柔和：先下发【读书提醒】，4秒后下发【出行提醒】', type: '看书', type2: '出行', delay: 4000 },
-  { id: 'soft_strong', name: '一柔一强', desc: '一柔一强：先下发【读书提醒】，4秒后下发【洗手提醒】', type: '看书', type2: '洗手', delay: 4000 },
-  { id: 'double_strong', name: '双次强度', desc: '双次强度：先下发【吃药提醒】，5秒后下发【洗手提醒】', type: '吃药', type2: '洗手', delay: 5000 }
+import { veepooFeature } from "../../miniprogram_dist/index";
+import { getBleManager } from "../../utils/bleManager";
+import {
+  ReminderQueue,
+  ReminderState,
+  ReminderType,
+  syncDeviceStateAfterConnect,
+} from "../../utils/reminderQueue";
+
+// 震动模式定义；保持与原版一致
+const MODE_LIST: Array<{
+  id: string;
+  name: string;
+  desc: string;
+  type: ReminderType;
+  type2?: ReminderType;
+}> = [
+  {
+    id: "single_soft",
+    name: "单次柔和",
+    desc: "下发【看书提醒】",
+    type: "看书",
+  },
+  {
+    id: "single_strong",
+    name: "单次强度",
+    desc: "下发【吃药提醒】",
+    type: "吃药",
+  },
+  {
+    id: "double_soft",
+    name: "双次柔和",
+    desc: "下发【看书提醒】+【出行提醒】",
+    type: "看书",
+    type2: "出行",
+  },
+  {
+    id: "soft_strong",
+    name: "一柔一强",
+    desc: "下发【看书提醒】+【洗手提醒】",
+    type: "看书",
+    type2: "洗手",
+  },
+  {
+    id: "double_strong",
+    name: "双次强度",
+    desc: "下发【吃药提醒】+【洗手提醒】",
+    type: "吃药",
+    type2: "洗手",
+  },
 ];
 
+const ALL_REMINDER_TYPES: ReminderType[] = [
+  "看书",
+  "吃药",
+  "出行",
+  "洗手",
+  // 旧版本中下发过的类型也加入清空范围，避免设备残留
+  "久坐",
+  "喝水",
+  "远眺",
+  "运动",
+];
+
+const bm = getBleManager();
+const queue = new ReminderQueue();
+
 Page({
-  /**
-   * 页面的初始数据
-   */
   data: {
     isConnected: false,
-    startTime: '08:00',
-    endTime: '22:00',
-    timeError: false,
-    selectedMode: 'single_soft',
-    modeList: MODE_LIST,
-    // 隐藏模式描述文字，不显示给用户
-    modeDescription: '',
-    intervalTime: 30,
+    syncing: false,
     isSaving: false,
-    canSave: true
+    canSave: false,
+
+    startTime: "08:00",
+    endTime: "22:00",
+    timeError: false,
+    selectedMode: "single_soft",
+    modeList: MODE_LIST,
+    intervalTime: 30,
+
+    alwaysOff: false,
+    alwaysOffText: "已关闭",
   },
 
-  // 内部变量，用于合并多批次回调
-  _tempReminderMap: null as any,
-  _commitTimer: null as any,
+  // 内部缓存：来自设备回调的最新状态，作为 diff 基线
+  _currentReminders: {} as Partial<Record<ReminderType, ReminderState>>,
+  _currentScreenKill: null as boolean | null,
 
-  // 手动 UTF-8 解码器，处理截断的序列，兼容不支持 TextDecoder 的环境
-  utf8Decode(bytes: Uint8Array): string {
-    let out = "";
-    let i = 0;
-    while (i < bytes.length) {
-      let c = bytes[i++];
-      if (c < 128) {
-        out += String.fromCharCode(c);
-      } else if (c > 191 && c < 224) {
-        if (i >= bytes.length) break;
-        let c2 = bytes[i++];
-        out += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
-      } else if (c > 223 && c < 240) {
-        if (i + 1 >= bytes.length) break;
-        let c2 = bytes[i++];
-        let c3 = bytes[i++];
-        out += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
-      } else if (c > 239 && c < 248) {
-        if (i + 2 >= bytes.length) break;
-        let c2 = bytes[i++];
-        let c3 = bytes[i++];
-        let c4 = bytes[i++];
-        let u = ((c & 7) << 18) | ((c2 & 63) << 12) | ((c3 & 63) << 6) | (c4 & 63);
-        u -= 0x10000;
-        out += String.fromCharCode(0xD800 | (u >> 10));
-        out += String.fromCharCode(0xDC00 | (u & 0x3FF));
-      }
-    }
-    return out;
-  },
+  // 防抖收集设备回调
+  _reminderUpdateTimer: null as any,
 
-  // 解码提醒名称 - 处理 SDK 返回的 URL 编码字符串
-  decodeReminderName(name: any): string {
-    if (!name || name === null) return '';
-    if (typeof name === 'string') {
-      if (name.includes('%')) {
-        try {
-          return decodeURIComponent(name);
-        } catch (e) {
-          try {
-            const bytes: number[] = [];
-            for (let i = 0; i < name.length; i++) {
-              if (name[i] === '%' && i + 2 < name.length) {
-                const hex = name.substring(i + 1, i + 3);
-                const byte = parseInt(hex, 16);
-                if (!isNaN(byte)) {
-                  bytes.push(byte);
-                  i += 2;
-                  continue;
-                }
-              }
-              bytes.push(name.charCodeAt(i));
-            }
-            return this.utf8Decode(new Uint8Array(bytes));
-          } catch (e2) {
-            console.warn('提醒名称深度解码失败:', name, e2);
-            return name;
-          }
-        }
-      }
-      return name;
-    }
-    return String(name);
-  },
+  // 事件取消句柄
+  _offConnected: null as null | (() => void),
+  _offDisconnected: null as null | (() => void),
+  _offReminder: null as null | (() => void),
+  _offScreenKill: null as null | (() => void),
 
-  /**
-   * 生命周期函数--监听页面加载
-   */
   onLoad() {
-    this._tempReminderMap = new Map();
+    this.bindManagerEvents();
   },
 
-  /**
-   * 生命周期函数--监听页面显示
-   */
   onShow() {
-    // 检查连接状态
-    this.checkConnectionStatus();
-    // 设置蓝牙数据监听
-    this.notifyMonitorValueChange();
-    // 读取当前设置
-    this.readCurrentSettings();
+    const connected = bm.isConnected();
+    this.setData({
+      isConnected: connected,
+      canSave: connected && !this.data.timeError,
+    });
+    if (connected) {
+      this.startSync();
+    }
   },
 
-  /**
-   * 检查连接状态
-   */
-  checkConnectionStatus() {
-    const connectionStatus = wx.getStorageSync('connectionStatus');
+  onUnload() {
+    if (this._offConnected) this._offConnected();
+    if (this._offDisconnected) this._offDisconnected();
+    if (this._offReminder) this._offReminder();
+    if (this._offScreenKill) this._offScreenKill();
+    if (this._reminderUpdateTimer) clearTimeout(this._reminderUpdateTimer);
+  },
+
+  // ---------- 事件订阅 ----------
+
+  bindManagerEvents() {
+    this._offConnected = bm.on("connected", () => {
+      this.setData({ isConnected: true, canSave: !this.data.timeError });
+      this.startSync();
+    });
+    this._offDisconnected = bm.on("disconnected", () => {
+      this.setData({
+        isConnected: false,
+        canSave: false,
+        syncing: false,
+      });
+    });
+    this._offReminder = bm.on("reminderUpdate", (content: any) => {
+      this.handleReminderCallback(content);
+    });
+    this._offScreenKill = bm.on("screenKillUpdate", (content: any) => {
+      this.handleScreenKillCallback(content);
+    });
+  },
+
+  startSync() {
+    this._currentReminders = {};
+    this._currentScreenKill = null;
+    this.setData({ syncing: true });
+    syncDeviceStateAfterConnect();
+    // 即使设备回调有缺失，也在 2.5s 后结束 syncing 占位态，避免一直 loading
+    setTimeout(() => {
+      if (this.data.syncing) this.setData({ syncing: false });
+    }, 2500);
+  },
+
+  // ---------- 回调处理 ----------
+
+  handleReminderCallback(content: any) {
+    if (!content) return;
+    const rawType = content.deviceType || content.type || "";
+    let type = rawType;
+    if (typeof rawType === "string" && rawType.indexOf("%") >= 0) {
+      try {
+        type = decodeURIComponent(rawType);
+      } catch (e) {
+        // 保持原值
+      }
+    }
+    if (!type) return;
+
+    const isOn =
+      content.deviceControl === "start" ||
+      content.deviceControl === true ||
+      content.switch === "start" ||
+      content.switch === true;
+
+    const interval = parseInt(String(content.intervalTime || "30"), 10);
+    this._currentReminders[type as ReminderType] = {
+      on: !!isOn,
+      startTime: content.startTime || "08:00",
+      endTime: content.endTime || "22:00",
+      intervalTime: isNaN(interval) ? 30 : interval,
+    };
+
+    // 防抖一次性更新 UI
+    if (this._reminderUpdateTimer) clearTimeout(this._reminderUpdateTimer);
+    this._reminderUpdateTimer = setTimeout(() => {
+      this.applyCurrentRemindersToUI();
+      this.setData({ syncing: false });
+    }, 400);
+  },
+
+  handleScreenKillCallback(content: any) {
+    if (!content) return;
+    const isOn =
+      content.status === 1 || content.control === 1 || content.switch === true;
+    this._currentScreenKill = !!isOn;
     this.setData({
-      isConnected: !!connectionStatus,
-      canSave: !!connectionStatus
+      alwaysOff: !!isOn,
+      alwaysOffText: isOn ? "已开启" : "已关闭",
     });
   },
 
   /**
-   * 读取当前设置
+   * 把 _currentReminders 反映到 UI（震动模式 / 时间 / 间隔）
    */
-  readCurrentSettings() {
-    if (!this.data.isConnected) return;
-    
-    // 清空缓存，准备接收新数据
-    if (this._tempReminderMap) this._tempReminderMap.clear();
-    if (this._commitTimer) clearTimeout(this._commitTimer);
+  applyCurrentRemindersToUI() {
+    const map = this._currentReminders;
+    const isActive = (t: ReminderType) => !!(map[t] && map[t]!.on);
 
-    const data = {
-      deviceControl: 'read'
-    };
-    veepooFeature.veepooSendHealthToastFeatureDataManager(data);
+    const bookActive = isActive("看书");
+    const medicineActive = isActive("吃药");
+    const travelActive = isActive("出行");
+    const washActive = isActive("洗手");
+
+    let matchedMode = this.data.selectedMode;
+    if (bookActive && travelActive) matchedMode = "double_soft";
+    else if (bookActive && washActive) matchedMode = "soft_strong";
+    else if (medicineActive && washActive) matchedMode = "double_strong";
+    else if (bookActive) matchedMode = "single_soft";
+    else if (medicineActive) matchedMode = "single_strong";
+
+    let intervalTime = this.data.intervalTime;
+    let startTime = this.data.startTime;
+    let endTime = this.data.endTime;
+    const baseline = bookActive
+      ? map["看书"]
+      : medicineActive
+      ? map["吃药"]
+      : null;
+    if (baseline) {
+      intervalTime = baseline.intervalTime || 30;
+      startTime = baseline.startTime || startTime;
+      endTime = baseline.endTime || endTime;
+    }
+
+    this.setData({
+      selectedMode: matchedMode,
+      intervalTime,
+      startTime,
+      endTime,
+    });
+    this.validateTime();
   },
 
+  // ---------- 表单交互 ----------
 
+  onStartTimeChange(e: any) {
+    this.setData({ startTime: e.detail.value });
+    this.validateTime();
+  },
+
+  onEndTimeChange(e: any) {
+    this.setData({ endTime: e.detail.value });
+    this.validateTime();
+  },
+
+  validateTime() {
+    const { startTime, endTime } = this.data;
+    const [sh, sm] = startTime.split(":").map((s) => parseInt(s, 10));
+    const [eh, em] = endTime.split(":").map((s) => parseInt(s, 10));
+    const startMin = sh * 60 + sm;
+    const endMin = eh * 60 + em;
+    const timeError = startMin >= endMin;
+    this.setData({
+      timeError,
+      canSave: !timeError && this.data.isConnected,
+    });
+  },
+
+  onModeSelect(e: any) {
+    const modeId = e.currentTarget.dataset.mode;
+    if (MODE_LIST.find((m) => m.id === modeId)) {
+      this.setData({ selectedMode: modeId });
+    }
+  },
+
+  onIntervalChanging(e: any) {
+    this.setData({ intervalTime: e.detail.value });
+  },
+
+  onIntervalChange(e: any) {
+    this.setData({ intervalTime: e.detail.value });
+  },
+
+  onIntervalInput(e: any) {
+    const val = e.detail.value;
+    if (val === "" || val === "0") return;
+    const num = parseInt(val, 10);
+    if (!isNaN(num)) this.setData({ intervalTime: num });
+  },
+
+  onIntervalInputBlur(e: any) {
+    let val = parseInt(e.detail.value, 10);
+    if (isNaN(val) || val < 1) val = 1;
+    if (val > 180) val = 180;
+    this.setData({ intervalTime: val });
+  },
+
+  onIntervalInputTap() {
+    // no-op
+  },
 
   /**
-   * 关闭选定的提醒（读书、吃药、洗手、出行）
+   * 常灭屏开关变化
    */
-  closeSelectedReminders() {
+  onAlwaysOffChange(e: any) {
     if (!this.data.isConnected) {
-      wx.showToast({
-        title: '请先连接设备',
-        icon: 'none'
+      wx.showToast({ title: "请先连接设备", icon: "none" });
+      // 把视觉状态还原成最近一次设备值
+      this.setData({
+        alwaysOff: !!this._currentScreenKill,
+        alwaysOffText: this._currentScreenKill ? "已开启" : "已关闭",
       });
+      return;
+    }
+    const value = !!e.detail.value;
+    // 视觉先标灰为「设置中」，但不切换 alwaysOff，等待回调
+    wx.showLoading({ title: value ? "开启中…" : "关闭中…", mask: true });
+
+    queue
+      .run([{ kind: "screenKill", on: value }])
+      .then((result) => {
+        wx.hideLoading();
+        if (result.success === 1) {
+          // 成功：UI 由 screenKillUpdate 回调更新
+          wx.showToast({
+            title: value ? "已开启常灭屏" : "已关闭常灭屏",
+            icon: "success",
+          });
+        } else {
+          wx.showToast({
+            title: "设置失败，请重试",
+            icon: "none",
+          });
+          // 还原 UI
+          this.setData({
+            alwaysOff: !!this._currentScreenKill,
+            alwaysOffText: this._currentScreenKill ? "已开启" : "已关闭",
+          });
+        }
+      })
+      .catch((err) => {
+        wx.hideLoading();
+        wx.showToast({ title: "设置失败：" + (err && err.message), icon: "none" });
+        this.setData({
+          alwaysOff: !!this._currentScreenKill,
+          alwaysOffText: this._currentScreenKill ? "已开启" : "已关闭",
+        });
+      });
+  },
+
+  /**
+   * 保存提醒设置（只下发实际有变化的指令）
+   */
+  saveSettings() {
+    if (!this.data.isConnected) {
+      wx.showModal({
+        title: "设备未连接",
+        content: "保存提醒设置需要先连接设备。",
+        confirmText: "去连接",
+        confirmColor: "#4DB6AC",
+        success: (res) => {
+          if (res.confirm) {
+            wx.switchTab({ url: "/pages/connect/index" });
+          }
+        },
+      });
+      return;
+    }
+    if (this.data.timeError) {
+      wx.showToast({ title: "请调整时间范围", icon: "none" });
+      return;
+    }
+    if (this.data.isSaving) return;
+
+    const mode = MODE_LIST.find((m) => m.id === this.data.selectedMode);
+    if (!mode) {
+      wx.showToast({ title: "未选择震动模式", icon: "none" });
+      return;
+    }
+
+    // 构造 4 类核心提醒的目标状态：mode 对应的 type/type2 开启，其他 3 类关闭
+    const activeTypes = new Set<ReminderType>();
+    activeTypes.add(mode.type);
+    if (mode.type2) activeTypes.add(mode.type2);
+
+    const baseState: ReminderState = {
+      on: false,
+      startTime: this.data.startTime,
+      endTime: this.data.endTime,
+      intervalTime: this.data.intervalTime,
+    };
+
+    const target: Record<string, ReminderState> = {};
+    ALL_REMINDER_TYPES.forEach((t) => {
+      target[t] = { ...baseState, on: activeTypes.has(t) };
+    });
+
+    const diff = ReminderQueue.computeDiff(
+      {
+        reminders: this._currentReminders,
+        screenKillOn: this._currentScreenKill,
+      },
+      {
+        reminders: target,
+        // 不在保存按钮里改常灭屏；保持当前值（null 表示不下发）
+        screenKillOn: null,
+      }
+    );
+
+    if (diff.length === 0) {
+      wx.showToast({ title: "已经是最新状态", icon: "success" });
       return;
     }
 
     this.setData({ isSaving: true, canSave: false });
+    queue
+      .run(diff)
+      .then((result) => {
+        this.setData({ isSaving: false, canSave: !this.data.timeError });
 
-    // 只关闭这4种提醒类型
-    const typesToClose = ['看书', '吃药', '洗手', '出行'];
-    let index = 0;
-
-    const closeNext = () => {
-      if (index >= typesToClose.length) {
-        this.setData({ isSaving: false, canSave: true });
-        wx.showToast({
-          title: '已关闭提醒',
-          icon: 'success'
-        });
-        return;
-      }
-
-      const data = {
-        switch: 'stop',
-        startTime: this.data.startTime,
-        endTime: this.data.endTime,
-        intervalTime: String(this.data.intervalTime),
-        deviceControl: 'setup',
-        deviceType: typesToClose[index]
-      };
-
-      veepooFeature.veepooSendHealthToastFeatureDataManager(data);
-      index++;
-      setTimeout(closeNext, 200);
-    };
-
-    closeNext();
-  },
-
-  /**
-   * 开始时间变化
-   */
-  onStartTimeChange(e: any) {
-    const startTime = e.detail.value;
-    this.setData({ startTime });
-    this.validateTime();
-  },
-
-  /**
-   * 结束时间变化
-   */
-  onEndTimeChange(e: any) {
-    const endTime = e.detail.value;
-    this.setData({ endTime });
-    this.validateTime();
-  },
-
-  /**
-   * 验证时间范围
-   */
-  validateTime() {
-    const { startTime, endTime } = this.data;
-    const [startH, startM] = startTime.split(':').map(Number);
-    const [endH, endM] = endTime.split(':').map(Number);
-    
-    const startMinutes = startH * 60 + startM;
-    const endMinutes = endH * 60 + endM;
-    
-    const timeError = startMinutes >= endMinutes;
-    this.setData({ 
-      timeError,
-      canSave: !timeError && this.data.isConnected
-    });
-  },
-
-  /**
-   * 震动模式选择
-   */
-  onModeSelect(e: any) {
-    const modeId = e.currentTarget.dataset.mode;
-    const mode = MODE_LIST.find(m => m.id === modeId);
-    
-    if (mode) {
-      this.setData({
-        selectedMode: modeId
-        // 不更新 modeDescription，保持隐藏
-      });
-    }
-  },
-
-  /**
-   * 滑块拖动中实时更新
-   */
-  onIntervalChanging(e: any) {
-    this.setData({
-      intervalTime: e.detail.value
-    });
-  },
-
-  /**
-   * 滑块松手确认
-   */
-  onIntervalChange(e: any) {
-    this.setData({
-      intervalTime: e.detail.value
-    });
-  },
-
-  /**
-   * 输入框实时输入
-   */
-  onIntervalInput(e: any) {
-    const val = e.detail.value;
-    // 允许输入过程中为空或部分数字，不立即校正
-    if (val === '' || val === '0') return;
-    const num = parseInt(val);
-    if (!isNaN(num)) {
-      this.setData({
-        intervalTime: num
-      });
-    }
-  },
-
-  /**
-   * 输入框失焦时校正范围
-   */
-  onIntervalInputBlur(e: any) {
-    let val = parseInt(e.detail.value);
-    if (isNaN(val) || val < 1) val = 1;
-    if (val > 180) val = 180;
-    this.setData({
-      intervalTime: val
-    });
-  },
-
-  /**
-   * 点击输入区域
-   */
-  onIntervalInputTap() {
-    // 空实现，仅用于事件冒泡处理
-  },
-
-  /**
-   * 保存设置
-   */
-  saveSettings() {
-    const self = this;
-    
-    if (!this.data.isConnected) {
-      wx.showModal({
-        title: '设备未连接',
-        content: '保存提醒设置需要连接蓝牙设备。请前往连接页面。',
-        confirmText: '去连接',
-        confirmColor: '#4DB6AC',
-        success: (res) => {
-          if (res.confirm) {
-            wx.switchTab({
-              url: '/pages/connect/index'
-            });
+        // 下发成功后，乐观更新本地基线：失败的指令不更新
+        const failedSet = new Set(
+          result.failed.map((f) => JSON.stringify(f.command))
+        );
+        diff.forEach((cmd) => {
+          if (failedSet.has(JSON.stringify(cmd))) return;
+          if (cmd.kind === "reminder") {
+            this._currentReminders[cmd.type] = { ...cmd.state };
           }
-        }
-      });
-      return;
-    }
+        });
 
-    if (this.data.timeError) {
-      wx.showToast({
-        title: '请调整时间范围',
-        icon: 'none'
-      });
-      return;
-    }
-
-    if (this.data.isSaving) {
-      return;
-    }
-
-    this.setData({
-      isSaving: true,
-      canSave: false
-    });
-
-    // 保存流程：先关闭所有提醒，然后设置新的提醒
-    this.closeAllReminders().then(() => {
-      self.setReminder();
-    });
-  },
-
-  /**
-   * 关闭所有提醒
-   */
-  closeAllReminders(): Promise<void> {
-    return new Promise((resolve) => {
-      const reminderTypes = ['久坐', '喝水', '远眺', '运动', '吃药', '看书', '出行', '洗手'];
-      let index = 0;
-      
-      const closeNext = () => {
-        if (index >= reminderTypes.length) {
-          resolve();
-          return;
-        }
-        
-        const data = {
-          switch: 'stop',
-          startTime: this.data.startTime,
-          endTime: this.data.endTime,
-          intervalTime: String(this.data.intervalTime),
-          deviceControl: 'setup',
-          deviceType: reminderTypes[index]
-        };
-        
-        veepooFeature.veepooSendHealthToastFeatureDataManager(data);
-        index++;
-        
-        setTimeout(closeNext, 200);
-      };
-      
-      closeNext();
-    });
-  },
-
-  /**
-   * 设置提醒
-   */
-  setReminder() {
-    const self = this;
-    const mode = MODE_LIST.find(m => m.id === this.data.selectedMode);
-    
-    if (!mode) {
-      this.finishSave();
-      return;
-    }
-
-    // 设置第一个提醒
-    const data1 = {
-      switch: 'start',
-      startTime: this.data.startTime,
-      endTime: this.data.endTime,
-      intervalTime: String(this.data.intervalTime),
-      deviceControl: 'setup',
-      deviceType: mode.type
-    };
-    
-    veepooFeature.veepooSendHealthToastFeatureDataManager(data1);
-
-    // 如果是双次模式，延迟设置第二个提醒
-    if (mode.type2 && mode.delay) {
-      setTimeout(() => {
-        const data2 = {
-          switch: 'start',
-          startTime: self.data.startTime,
-          endTime: self.data.endTime,
-          intervalTime: String(self.data.intervalTime),
-          deviceControl: 'setup',
-          deviceType: mode.type2
-        };
-        
-        veepooFeature.veepooSendHealthToastFeatureDataManager(data2);
-        
-        setTimeout(() => {
-          self.finishSave();
-        }, 500);
-      }, mode.delay);
-    } else {
-      setTimeout(() => {
-        self.finishSave();
-      }, 500);
-    }
-  },
-
-  /**
-   * 完成保存
-   */
-  finishSave() {
-    this.setData({
-      isSaving: false,
-      canSave: true
-    });
-
-    wx.showToast({
-      title: '已保存',
-      icon: 'success'
-    });
-  },
-
-  /**
-   * 监听蓝牙数据返回
-   */
-  notifyMonitorValueChange() {
-    const self = this;
-    
-    veepooBle.veepooWeiXinSDKNotifyMonitorValueChange(function(e: any) {
-      console.log('自觉提醒页蓝牙回调:', e);
-      if (!e) return;
-
-      // 健康提醒数据 (type = 23)
-      if (e.type === 23) {
-        const content = e.content;
-        if (!content) return;
-
-        // 解码提醒类型名称
-        const type = self.decodeReminderName(content.deviceType || content.type || '');
-        if (!type) {
-          console.warn('收到无类型的提醒数据:', content);
-          return;
-        }
-
-        // 存入临时 Map
-        if (self._tempReminderMap) {
-          self._tempReminderMap.set(type, {
-            ...content,
-            deviceType: type // 使用解码后的名称
+        if (result.failed.length === 0) {
+          wx.showToast({ title: "保存成功", icon: "success" });
+        } else {
+          const failedTypes = result.failed
+            .map((f) =>
+              f.command.kind === "reminder" ? f.command.type : "常灭屏"
+            )
+            .join("、");
+          wx.showModal({
+            title: "部分项下发失败",
+            content: `失败：${failedTypes}\n请检查设备连接后重试。`,
+            showCancel: false,
+            confirmColor: "#4DB6AC",
           });
         }
-
-        // 开启提交定时器（防抖）
-        if (self._commitTimer) clearTimeout(self._commitTimer);
-        self._commitTimer = setTimeout(() => {
-          self.commitReminders();
-        }, 500);
-      }
-    });
+      })
+      .catch((err) => {
+        this.setData({ isSaving: false, canSave: !this.data.timeError });
+        wx.showToast({ title: "保存失败：" + (err && err.message), icon: "none" });
+      });
   },
 
   /**
-   * 提交并更新 UI 状态
+   * 关闭 4 类核心提醒
    */
-  commitReminders() {
-    const reminders: any[] = Array.from(this._tempReminderMap.values());
-    if (reminders.length === 0) return;
+  closeSelectedReminders() {
+    if (!this.data.isConnected) {
+      wx.showToast({ title: "请先连接设备", icon: "none" });
+      return;
+    }
+    if (this.data.isSaving) return;
 
-    console.log('开始合并提醒数据:', reminders);
-
-    // 构建提醒状态映射：只关心 看书/吃药/出行/洗手 四种类型
-    const reminderMap: Record<string, any> = {};
-    reminders.forEach((r: any) => {
-      reminderMap[r.deviceType] = r;
-    });
-
-    const isActive = (type: string) => {
-      const r = reminderMap[type];
-      return r && (r.deviceControl === true || r.deviceControl === 'start' || r.switch === 'start');
+    const baseState: ReminderState = {
+      on: false,
+      startTime: this.data.startTime,
+      endTime: this.data.endTime,
+      intervalTime: this.data.intervalTime,
     };
 
-    const bookActive = isActive('看书');
-    const medicineActive = isActive('吃药');
-    const travelActive = isActive('出行');
-    const washActive = isActive('洗手');
+    const types: ReminderType[] = ["看书", "吃药", "出行", "洗手"];
+    const target: Record<string, ReminderState> = {};
+    types.forEach((t) => (target[t] = { ...baseState }));
 
-    console.log('提醒状态 - 看书:', bookActive, '吃药:', medicineActive, '出行:', travelActive, '洗手:', washActive);
+    const diff = ReminderQueue.computeDiff(
+      {
+        reminders: this._currentReminders,
+        screenKillOn: this._currentScreenKill,
+      },
+      { reminders: target, screenKillOn: null }
+    );
 
-    // 根据开启的状态组合匹配震动模式
-    let matchedMode = 'single_soft'; // 默认第一个模式
-
-    if (bookActive && travelActive) {
-      matchedMode = 'double_soft';       // 双次柔和：看书 + 出行
-    } else if (bookActive && washActive) {
-      matchedMode = 'soft_strong';       // 一柔一强：看书 + 洗手
-    } else if (medicineActive && washActive) {
-      matchedMode = 'double_strong';     // 双次强度：吃药 + 洗手
-    } else if (bookActive) {
-      matchedMode = 'single_soft';       // 单次柔和：仅看书
-    } else if (medicineActive) {
-      matchedMode = 'single_strong';     // 单次强度：仅吃药
-    }
-    // 其他情况（全关或不匹配）默认 single_soft
-
-    // 间隔时间优先级：看书 > 吃药 > 默认30
-    let intervalTime = 30;
-    if (bookActive && reminderMap['看书']?.intervalTime) {
-      intervalTime = parseInt(reminderMap['看书'].intervalTime) || 30;
-    } else if (medicineActive && reminderMap['吃药']?.intervalTime) {
-      intervalTime = parseInt(reminderMap['吃药'].intervalTime) || 30;
+    if (diff.length === 0) {
+      wx.showToast({ title: "提醒已是关闭状态", icon: "success" });
+      return;
     }
 
-    // 开始/结束时间优先级：看书 > 吃药 > 默认值
-    let startTime = '08:00';
-    let endTime = '22:00';
-    if (bookActive && reminderMap['看书']) {
-      startTime = reminderMap['看书'].startTime || startTime;
-      endTime = reminderMap['看书'].endTime || endTime;
-    } else if (medicineActive && reminderMap['吃药']) {
-      startTime = reminderMap['吃药'].startTime || startTime;
-      endTime = reminderMap['吃药'].endTime || endTime;
-    }
+    this.setData({ isSaving: true, canSave: false });
+    queue
+      .run(diff)
+      .then((result) => {
+        this.setData({ isSaving: false, canSave: !this.data.timeError });
+        if (result.failed.length === 0) {
+          wx.showToast({ title: "已关闭提醒", icon: "success" });
+          types.forEach((t) => (this._currentReminders[t] = { ...baseState }));
+        } else {
+          wx.showToast({ title: "部分关闭失败，请重试", icon: "none" });
+        }
+      })
+      .catch((err) => {
+        this.setData({ isSaving: false, canSave: !this.data.timeError });
+        wx.showToast({ title: "关闭失败：" + (err && err.message), icon: "none" });
+      });
+  },
 
-    console.log('匹配结果 - 模式:', matchedMode, '间隔:', intervalTime, '时间:', startTime, '-', endTime);
+  /**
+   * 主动重新读取设备状态（暴露给 UI 的「同步」按钮，可选）
+   */
+  refreshFromDevice() {
+    if (!this.data.isConnected) return;
+    this.startSync();
+  },
 
-    this.setData({
-      startTime,
-      endTime,
-      intervalTime,
-      selectedMode: matchedMode
-    });
-    this.validateTime();
-  }
+  // 兼容：保留 veepooFeature 引用，避免被 ts 当成未使用
+  _ensureSdkRef() {
+    return veepooFeature;
+  },
 });

@@ -347,3 +347,39 @@ page {
   color: #b0bec5;
   border-color: #cfd8dc;
 }
+
+/* === 新增样式：常灭屏开关 + 同步占位 === */
+
+.switch-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8rpx 0;
+}
+
+.switch-status {
+  font-size: 24rpx;
+  margin-left: 12rpx;
+  color: #78909c;
+}
+
+.switch-status.on {
+  color: #26a69a;
+}
+
+.switch-status.off {
+  color: #b0bec5;
+}
+
+.syncing-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24rpx;
+}
+
+.syncing-text {
+  margin-left: 16rpx;
+  font-size: 28rpx;
+  color: #78909c;
+}

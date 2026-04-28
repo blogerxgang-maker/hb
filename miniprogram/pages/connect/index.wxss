@@ -55,6 +55,11 @@ page {
   animation: pulse 1.5s infinite;
 }
 
+.status-icon-circle.connecting {
+  background-color: #FFE0B2;
+  animation: pulse 1.5s infinite;
+}
+
 .status-icon-circle.connected {
   background-color: #B2DFDB;
 }
