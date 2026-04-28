@@ -1,4 +1,8 @@
 // app.ts
+// 注意：避免使用 TS-only 语法（参数类型注解 / 泛型 / as），
+// 以兼容某些 IDE 在根目录 app.ts 上未启用 TS preset 时的 Babel 解析。
+// @ts-nocheck
+
 import { veepooJLBle } from "./jieli_sdk/bleInit";
 import { getBleManager } from "./utils/bleManager";
 import { syncDeviceStateAfterConnect } from "./utils/reminderQueue";
@@ -7,17 +11,16 @@ const vpJLBle = new veepooJLBle();
 
 // 全局注入分享逻辑（保留原有行为）
 const originalPage = Page;
-// @ts-ignore
-Page = (options: any) => {
+Page = function (options) {
   const originalOnShareAppMessage = options.onShareAppMessage;
-  options.onShareAppMessage = function (res: any) {
+  options.onShareAppMessage = function (res) {
     if (originalOnShareAppMessage) {
       return originalOnShareAppMessage.call(this, res);
     }
     return {
       title: "蓝牙手环",
       imageUrl: "/image/share.jpg",
-      path: this.route ? `/${this.route}` : "/pages/connect/index",
+      path: this.route ? "/" + this.route : "/pages/connect/index",
     };
   };
 
@@ -36,12 +39,12 @@ Page = (options: any) => {
   return originalPage(options);
 };
 
-App<IAppOption>({
+App({
   globalData: {},
-  onLaunch() {
+  onLaunch: function () {
     // 修复 SDK 内部 uint8ArrayToString 处理 UTF-8 截断序列时抛 URIError
     const originalDecode = decodeURIComponent;
-    (globalThis as any).decodeURIComponent = function (s: string) {
+    globalThis.decodeURIComponent = function (s) {
       try {
         return originalDecode(s);
       } catch (e) {
@@ -60,7 +63,7 @@ App<IAppOption>({
     this.globalData.bleManager = bleManager;
 
     // 连接成功后自动同步设备状态（常灭屏 + 提醒开关）
-    bleManager.on("connected", () => {
+    bleManager.on("connected", function () {
       console.log("[app] 设备已连接，同步状态…");
       syncDeviceStateAfterConnect();
     });
